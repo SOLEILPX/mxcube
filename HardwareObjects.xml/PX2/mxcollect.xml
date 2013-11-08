@@ -1,16 +1,16 @@
 <procedure class="PX2MultiCollect">
 
    <!-- object href="/dbconnection-mockup" role="dbserver" / -->
-   <object href="/safshut" role="safety_shutter" />
+   <object href="/obx" role="safety_shutter" />
    <object href="/fastshutter" role="fast_shutter" />
    <object href="/mxlocal" role="beamline_configuration" />
    <object href="/minidiff" role="diffractometer" />
    <object href="/sc-mockup" role="sample_changer" />
-   <object href="/energyscan" role="energy" />
-   <object href="/attenuators" role="transmission" />
-   <object href="/detdist" role="detector_distance" />
+   <object href="/BLEnergy" role="energy" />
+   <object href="/Ps_attenuator" role="transmission" />
+   <object href="/detectordistance" role="detector_distance" />
    <object href="/mach" role="machine_current" />
-   <object href="/resmot" role="resolution" />
+   <object href="/resolution" role="resolution" />
 
    <!-- Following values are for ADSC detector -->
    <adscname>i11-ma-cx1/dt/adsc</adscname>
