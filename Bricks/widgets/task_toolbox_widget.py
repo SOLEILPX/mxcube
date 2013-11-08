@@ -104,21 +104,23 @@ class TaskToolBoxWidget(qt.QWidget):
             
     def current_page_changed(self, page_index):
         tree_items =  self.tree_brick.get_selected_items()
-        tree_item = tree_items[0]
 
-        # Get the directory form the previous page and update 
-        # the new page with the direcotry and run_number from the old.
-        # IFF sample or group selected.
-        if isinstance(tree_item, queue_item.DataCollectionGroupQueueItem) or\
-                isinstance(tree_item, queue_item.SampleQueueItem):
-            new_pt = self.tool_box.item(page_index)._path_template
-            previous_pt = self.tool_box.item(self.previous_page_index)._path_template
-            new_pt.directory = previous_pt.directory
-            new_pt.run_number = self._beamline_setup_hwobj.queue_model_hwobj.\
-                get_next_run_number(new_pt)
-       
-        self.tool_box.item(page_index).selection_changed(tree_items)
-        self.previous_page_index = page_index
+        if len(tree_items) > 0:        
+            tree_item = tree_items[0]
+
+            # Get the directory form the previous page and update 
+            # the new page with the direcotry and run_number from the old.
+            # IFF sample or group selected.
+            if isinstance(tree_item, queue_item.DataCollectionGroupQueueItem) or\
+                    isinstance(tree_item, queue_item.SampleQueueItem):
+                new_pt = self.tool_box.item(page_index)._path_template
+                previous_pt = self.tool_box.item(self.previous_page_index)._path_template
+                new_pt.directory = previous_pt.directory
+                new_pt.run_number = self._beamline_setup_hwobj.queue_model_hwobj.\
+                    get_next_run_number(new_pt)
+
+            self.tool_box.item(page_index).selection_changed(tree_items)
+            self.previous_page_index = page_index
 
     def selection_changed(self, items):
         """
@@ -138,35 +140,38 @@ class TaskToolBoxWidget(qt.QWidget):
             else:
                 for item in items:
                     shapes = self.shape_history.selected_shapes
+                    task_model = item.get_model()
 
+                    # Create a new group if sample is selected
+                    if isinstance(task_model, queue_model_objects.Sample):
+                        group_task_node = queue_model_objects.TaskGroup()
+                        current_item = self.tool_box.currentItem()
+
+                        if current_item is self.workflow_page:
+                            group_name = current_item._workflow_cbox.currentText()
+                        else:
+                            group_name = current_item._task_node_name
+
+                        group_task_node.set_name(group_name)
+                        num = task_model.get_next_number_for_name(group_name)
+                        group_task_node.set_number(num)
+
+                        self.tree_brick.queue_model_hwobj.\
+                          add_child(task_model, group_task_node)
+
+                        task_model = group_task_node
+                    
                     if len(shapes):
                         for shape in shapes:
-                            self.create_task(item.get_model(), shape)
+                            self.create_task(task_model, shape)
                     else:
-                        self.create_task(item.get_model())
+                        self.create_task(task_model)
 
             self.tool_box.currentItem().update_selection()
 
     def create_task(self, task_node, shape = None):
-        # Selected item is a sample
-        if isinstance(task_node, queue_model_objects.Sample):
-            group_task_node = queue_model_objects.TaskGroup()
-            current_item = self.tool_box.currentItem()
-
-            if current_item is self.workflow_page:
-                group_name = current_item._workflow_cbox.currentText()
-            else:
-                group_name = current_item._task_node_name
-
-            group_task_node.set_name(group_name)
-            num = task_node.get_next_number_for_name(group_name)
-            group_task_node.set_number(num)
-
-            self.tree_brick.queue_model_hwobj.add_child(task_node, group_task_node)
-            self.create_task(group_task_node, shape)
-
         # Selected item is a task group
-        elif isinstance(task_node, queue_model_objects.TaskGroup):
+        if isinstance(task_node, queue_model_objects.TaskGroup):
             sample = task_node.get_parent()
             task_list = self.tool_box.currentItem().create_task(sample, shape)
 
