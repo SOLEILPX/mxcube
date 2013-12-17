@@ -1,19 +1,18 @@
-<equipment class="EnergyScan">
-    <tangoname>/BLEnergy</tangoname> 
-    <blenergy>i11-ma-c00/ex/beamlineenergy</blenergy>
-    <mono>i11-ma-c03/op/mono1</mono>
-    <mono_mt_rx>i11-ma-c03/op/mono1-mt_rx</mono_mt_rx>
-    <U24Energy>ans-c11/ei/m-u24_energy</U24Energy>
-    <ketek>i11-ma-cx1/dt/dtc-mca_xmap.1</ketek> <!--ketek probably in our case controlled by md2 i11-ma-cx1/dt/dtc_sdd.1 check that!!!-->
-    <counter>i11-ma-c00/ca/cpt.2</counter> <!-- i11-ma-c00/ca/bai.1144-pci.1h-cpt.1</counter>  i11-ma-c00/ca/cpt.1 change that -->
-    <xbpm>i11-ma-c04/dt/xbpm_diode.1</xbpm> <!-- check that -->
-    <attenuator>i11-ma-c05/ex/att.1</attenuator> <!-- check that i11-ma-c02/ex/att.1-->
-    <md2>i11-ma-cx1/ex/md2</md2>
-    <light>i11-ma-cx1/ex/md2</light> <!-- light.1-pos</light> check that; might correspond to MD2/backlightlevelison ? --> 
-    <bst>i11-ma-cx1/ex/md2-mvbs</bst> <!--<bst>i11-ma-cx1/ex/bst.1-ev</bst> check that ange that --> 
-    <ketekinsert>i11-ma-cx1/ex/md2</ketekinsert> <!-- <rontecinsert>i11-ma-cx1/ex/dtc_sdd.1-pos</rontecinsert> check that!!!-->
+<equipment class="EnergyScanPX2">
+    <tangoname>i11-ma-cx1/ex/md2</tangoname>
+    <pss>i11-ma-ce/pss/db_data-parser</pss>
+    <counter>i11-ma-c00/ca/cpt.2</counter>
+    <cvd>i11-ma-c05/dt/xbpm-cvd.1</cvd>
+    <diode5>i11-ma-c06/dt/xbpm_diode.5</diode5>
+    <diode3>i11-ma-c05/dt/xbpm_diode.3</diode3>
+    <diode1>i11-ma-c04/dt/xbpm_diode.1</diode1>
     <safetyshutter>i11-ma-c04/ex/obx.1</safetyshutter>
-    <directoryprefix>/927bis/ccd/2013</directoryprefix> <!-- check that -->
+    <ble>i11-ma-c00/ex/beamlineenergy</ble>
+    <undulator>ans-c11/ei/m-u24_energy</undulator>
+    <monofine>i11-ma-c03/op/mono1-mt_rx_fine</monofine>
+    <mono>i11-ma-c03/op/mono1</mono>
+    <fluodetector>i11-ma-cx1/dt/dtc-mca_xmap.1</fluodetector>
+    
     <scan>
         <roiwidth>0.3</roiwidth>
         <before>0.050</before>
@@ -222,7 +221,7 @@
             <directory>pk</directory>
         </defaultenergy>
         <defaultenergy>
-            <energy>13.658</energy>
+            <energy>12.658</energy>
             <directory>ip</directory>
         </defaultenergy>
         <defaultenergy>
