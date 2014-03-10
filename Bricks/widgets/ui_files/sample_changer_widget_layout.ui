@@ -15,6 +15,9 @@
     <property name="caption">
         <string>SampleChangerWidget</string>
     </property>
+    <property name="toolTip" stdset="0">
+        <string>Load sample list from ISPyB</string>
+    </property>
     <hbox>
         <property name="name">
             <cstring>unnamed</cstring>
@@ -100,6 +103,11 @@
                                                     <string>Manually mounted</string>
                                                 </property>
                                             </item>
+                                            <item>
+                                                <property name="text">
+                                                    <string>Plate</string>
+                                                </property>
+                                            </item>
                                             <property name="name">
                                                 <cstring>filter_cbox</cstring>
                                             </property>
@@ -178,7 +186,12 @@
                                     </item>
                                     <item>
                                         <property name="text">
-                                            <string>Automatic loop centring</string>
+                                            <string>Semi Automatic</string>
+                                        </property>
+                                    </item>
+                                    <item>
+                                        <property name="text">
+                                            <string>Fully Automatic</string>
                                         </property>
                                     </item>
                                     <property name="name">
@@ -188,6 +201,9 @@
                                         <font>
                                             <pointsize>10</pointsize>
                                         </font>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>&lt;B&gt;Manual&lt;/B&gt; 3-Click centring &lt;BR&gt; &lt;B&gt;Semi Automatic&lt;/B&gt; - Gives the possibility to confirm centring &lt;BR&gt; &lt;B&gt;Fully Automatic&lt;/B&gt; - Continues without waiting for confirmation</string>
                                     </property>
                                 </widget>
                                 <spacer>
