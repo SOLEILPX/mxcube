@@ -1,4 +1,6 @@
-
+# 
+# From HutchMenuBrick.py
+#
 from qt import *
 from BlissFramework import Icons
 import logging
