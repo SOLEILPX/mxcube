@@ -6,15 +6,15 @@ import queue_item
 
 from collections import namedtuple
 from BlissFramework import Icons, BaseComponents
+from SampleChangerBrick import SC_STATE_COLOR
 from HardwareRepository.HardwareRepository import dispatcher
-from sample_changer_helper import *
 
 from widgets.dc_tree_widget import DataCollectTree
 
 __category__ = 'mxCuBE_v3'
 
-#ViewType = namedtuple('ViewType', ['ISPYB', 'MANUAL', 'SC'])
-#TREE_VIEW_TYPE = ViewType(0, 1, 2)
+ViewType = namedtuple('ViewType', ['ISPYB', 'MANUAL', 'SC'])
+TREE_VIEW_TYPE = ViewType(0, 1, 2)
 
 
 class TreeBrick(BaseComponents.BlissWidget):
@@ -217,10 +217,11 @@ class TreeBrick(BaseComponents.BlissWidget):
             self._lims_hwobj = bl_setup.lims_client_hwobj
 
             if self.sample_changer_hwobj is not None:
-                self.connect(self.sample_changer_hwobj, SampleChanger.STATE_CHANGED_EVENT,
-                             self.sample_load_state_changed)
-                self.connect(self.sample_changer_hwobj, SampleChanger.INFO_CHANGED_EVENT, 
+                self.connect(self.sample_changer_hwobj, 'matrixCodesUpdate',
                              self.set_sample_pin_icon)
+
+                self.connect(self.sample_changer_hwobj, 'stateChanged', 
+                             self.sample_load_state_changed)
 
             has_shutter_less = bl_setup.detector_has_shutterless()
 
@@ -258,7 +259,10 @@ class TreeBrick(BaseComponents.BlissWidget):
         self.sample_changer_widget.child('filter_cbox').setCurrentItem(0)
         #endif 
 
-        if not self.sample_changer_hwobj.hasLoadedSample():
+        loaded_sample = self.sample_changer_hwobj.\
+                        getLoadedSampleLocation()
+
+        if loaded_sample == (None, None):
             self.dc_tree_widget.filter_sample_list(2)
             self.sample_changer_widget.child('filter_cbox').setCurrentItem(2)
 
@@ -371,21 +375,19 @@ class TreeBrick(BaseComponents.BlissWidget):
         :returns: A list with tuples, containing the sample information.
         """
         sc_content = []
-      
-        try: 
-            for sample in self.sample_changer_hwobj.getSampleList():
-                matrix = sample.getID() or ""
-                basket_index = sample.getContainer().getIndex()
-                vial_index = sample.getIndex()
-                basket_code = sample.getContainer().getID() or ""
-            
-                sc_content.append((matrix, basket_index+1, vial_index+1, basket_code, 0))
+        
+        try:
+            sc_content = self.sample_changer_hwobj.getMatrixCodes()            
         except Exception:
             logging.getLogger("user_level_log").\
                 info("Could not connect to sample changer,"  + \
                      " unable to list contents. Make sure that" + \
                      " the sample changer is turned on. Using free pin mode")
             sc_content = [('', -1, -1, '', 1)]
+            #self.dc_tree_widget.init_with_sc_content(sc_content)
+            #self.dc_tree_widget.filter_sample_list(SC_FILTER_OPTIONS.FREE_PIN)
+            #self.sample_changer_widget.filter_cbox.\
+            #    setCurrentItem(SC_FILTER_OPTIONS.FREE_PIN)
 
         return sc_content
 
@@ -400,7 +402,7 @@ class TreeBrick(BaseComponents.BlissWidget):
         """
         logging.getLogger("user_level_log").info(msg)
 
-    def set_sample_pin_icon(self):
+    def set_sample_pin_icon(self, matrices):
         """
         Updates the location of the sample pin when the
         matrix code information changes. The matrix code information
@@ -408,7 +410,7 @@ class TreeBrick(BaseComponents.BlissWidget):
         """
         self.dc_tree_widget.set_sample_pin_icon()
 
-    def sample_load_state_changed(self, state, *args):
+    def sample_load_state_changed(self, state):
         """
         The state in the sample loading procedure changed.
         Ie from Loading to mounted

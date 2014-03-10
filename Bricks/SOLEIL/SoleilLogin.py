@@ -75,13 +75,13 @@ class SoleilLogin(BlissWidget):
         self.propNumber=QLineEdit(self.loginBox)
         self.propNumber.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.MinimumExpanding)
         self.propNumber.setPaletteBackgroundColor(widget_colors.LIGHT_RED)
-        self.propNumber.setFixedWidth(50)
+        self.propNumber.setFixedWidth(30) #50
         password_label=QLabel("   Password: ",self.loginBox)
         self.propPassword=QLineEdit(self.loginBox)
         self.propPassword.setEchoMode(QLineEdit.Password)
         self.propPassword.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.MinimumExpanding)
         self.propPassword.setPaletteBackgroundColor(widget_colors.LIGHT_RED)
-        self.propPassword.setFixedWidth(75)
+        self.propPassword.setFixedWidth(50) #75
         self.connect(self.propPassword, SIGNAL('returnPressed()'), self.login)
 
         self.loginButton=QToolButton(self.loginBox)
@@ -94,7 +94,7 @@ class SoleilLogin(BlissWidget):
         self.logoutButton=QToolButton(self.contentsBox)
         self.logoutButton.setTextLabel("Logout")
         font = self.logoutButton.font()
-        font.setPointSize(10)
+        font.setPointSize(9) #10
         self.logoutButton.setFont(font)
         self.logoutButton.setUsesTextLabel(True)
         self.logoutButton.setTextPosition(QToolButton.BesideIcon)
@@ -105,7 +105,7 @@ class SoleilLogin(BlissWidget):
         labels_box=QHBox(self.contentsBox, 'contents_box')
         labels_box.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
         font = labels_box.font()
-        font.setPointSize(10)
+        font.setPointSize(9) #10
         labels_box.setFont(font)
 
         self.titleLabel=QLabel(labels_box)

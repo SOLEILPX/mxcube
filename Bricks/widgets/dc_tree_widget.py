@@ -280,7 +280,7 @@ class DataCollectTree(qt.QWidget):
 
             location = items[0].get_model().location
             self.beamline_setup_hwobj.sample_changer_hwobj.\
-                 unload(22, sample_location = location, wait = False)
+                 unloadSample(22, sample_location = location)
 
     def sample_list_view_selection(self):
         items = self.get_selected_items()
@@ -401,18 +401,14 @@ class DataCollectTree(qt.QWidget):
             self.set_sample_pin_icon()
         elif option == SC_FILTER_OPTIONS.MOUNTED_SAMPLE:
             loaded_sample = self.sample_changer_hwobj.\
-                                 getLoadedSample()
-            try:
-                loaded_sample_loc = loaded_sample.getCoords()
-            except:
-                loaded_sample_loc = None
+                            getLoadedSampleLocation()
 
             it = qt.QListViewItemIterator(self.sample_list_view)
             item = it.current()
         
             while item:
                 if isinstance(item, queue_item.SampleQueueItem):
-                    if item.get_model().location == loaded_sample_loc:
+                    if item.get_model().location == loaded_sample:
                         item.setSelected(True)
                         item.setVisible(True)
                     else:
@@ -425,8 +421,6 @@ class DataCollectTree(qt.QWidget):
             self.sample_list_view.clear()
             self.queue_model_hwobj.select_model('free-pin')
             self.sample_list_view.firstChild().setSelected(True)
-
-        self.sample_list_view_selection()
             
     def set_centring_method(self, method_number):       
         self.centring_method = method_number
@@ -494,9 +488,8 @@ class DataCollectTree(qt.QWidget):
 
     def is_mounted_sample_item(self, item):
         if isinstance(item, queue_item.SampleQueueItem):
-            if not self.sample_changer_hwobj.hasLoadedSample():
-                return False
-            if item.get_model().location == self.sample_changer_hwobj.getLoadedSample().getCoords():
+            if item.get_model().location == self.sample_changer_hwobj.\
+                   getLoadedSampleLocation():
                 return True
 
     def collect_items(self, items = [], checked_items = []):
@@ -680,7 +673,7 @@ class DataCollectTree(qt.QWidget):
         it = qt.QListViewItemIterator(self.sample_list_view)
         item = it.current()
 
-        #self.beamline_setup_hwobj.shape_history_hwobj.clear_all()
+        self.beamline_setup_hwobj.shape_history_hwobj.clear_all()
 
         while item:
             if self.is_mounted_sample_item(item):

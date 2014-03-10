@@ -1,9 +1,9 @@
 <device class="TangoDCMotorWPositions">
-    <username>Scintillator Position</username>
+    <username>Aperture Position</username>
     <tangoname>i11-ma-cx1/ex/md2</tangoname>
     <channel type="tango" polling="1000" name="state">State</channel>
     <datatype>int</datatype>
-    <channel type="tango" tangoname="i11-ma-cx1/ex/md2" polling="1000" name="position">ScintilPDPredefinedPosition</channel>
+    <channel type="tango" tangoname="i11-ma-cx1/ex/md2" polling="1000" name="position">AperturePredefinedPosition</channel>
     <delta>0.1</delta>
     <interval>1000</interval>
     <positions>

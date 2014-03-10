@@ -65,6 +65,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 import os
 import numpy
 import shutil
+import traceback
 
 __category__ = 'mxCuBE'
 
@@ -323,8 +324,10 @@ class XfeSpectrumBrick(BlissWidget):
 
         self.statusBox.setTitle("starting Xfe spectrum...")
         spectrum_result=self.xfeSpectrum.startXfeSpectrum(str(self.countTimeInput.text()),
-            str(self.directoryInput.text()),\
-            str(self.prefixInput.text()), self.sessionId, self.blSampleId)
+                                                          str(self.directoryInput.text()),
+                                                          str(self.prefixInput.text()), 
+                                                          self.sessionId, 
+                                                          self.blSampleId)
 
         if not spectrum_result:
             self.spectrumFailed()
@@ -347,19 +350,28 @@ class XfeSpectrumBrick(BlissWidget):
     def spectrumFinished(self, mca_data,calib,config):
 
         a = str(self.directoryInput.text()).split(os.path.sep)
-        suffix_path=os.path.join(*a[4:])
-        if 'inhouse' in a :
-            a_dir = os.path.join('/data/pyarch/', a[2], suffix_path)
+        print 'a', a
+        dirctr = str(self.directoryInput.text()) #let's have string instead of QString
+        print 'self.directoryInput.text()', self.directoryInput.text()
+        if dirctr[-1] == '/':
+            a_dir = dirctr[:-1]
         else:
-            a_dir = os.path.join('/data/pyarch/',a[4],a[3],*a[5:])
-        if a_dir[-1]!=os.path.sep:
-            a_dir+=os.path.sep
+            a_dir = dirctr
+
+        #a = str(self.directoryInput.text()).split(os.path.sep)
+        #suffix_path=os.path.join(*a[4:])
+        #if 'inhouse' in a :
+            #a_dir = os.path.join('/data/pyarch/', a[2], suffix_path)
+        #else:
+            #a_dir = os.path.join('/data/pyarch/',a[4],a[3],*a[5:])
+        #if a_dir[-1]!=os.path.sep:
+            #a_dir+=os.path.sep
         print "a_dir --------------------------->", a_dir
         
         if not os.path.exists(os.path.dirname(a_dir)):
             os.makedirs(os.path.dirname(a_dir))
         
-        filename_pattern = os.path.join(str(self.directoryInput.text()), "%s_%s_%%02d" % (str(self.prefixInput.text()),time.strftime("%d_%b_%Y")) )
+        filename_pattern = os.path.join(a_dir, "%s_%s_%%02d" % (str(self.prefixInput.text()),time.strftime("%d_%b_%Y")) )
         filename_pattern = os.path.extsep.join((filename_pattern, "png"))
         filename = filename_pattern % 1
 
@@ -398,7 +410,14 @@ class XfeSpectrumBrick(BlissWidget):
         logging.getLogger().info("Rendering spectrum to PNG file : %s", filename)
         canvas.print_figure(filename, dpi=80)
         logging.getLogger().debug("Copying PNG file to: %s", a_dir)
-        shutil.copy (filename, a_dir)
+        #shutil.copy (filename, a_dir)
+        try:
+            shutil.copy (filename, str(a_dir) + '/')
+            logging.getLogger().debug("Copying .fit file to: %s", a_dir)
+        except:
+            print 'Problem copying file ', filename, 'to ', a_dir
+            logging.getLogger().debug("Problem copying .fit file to: %s", a_dir)
+
         logging.getLogger().debug("Copying .fit file to: %s", a_dir)
         #tmpname=filename.split(".")
         
@@ -406,12 +425,14 @@ class XfeSpectrumBrick(BlissWidget):
         color=XfeSpectrumBrick.STATES['ok']
         self.statusBox.setTitle("Xfe spectrum status")
 
-        config['max']=config['max_user']
+        config['max']='max_user' #config['max_user']
         config['htmldir'] = a_dir
         try:
             self.emit(PYSIGNAL("xfeSpectrumDone"), (mca_data,calib,config))
         except:
             logging.getLogger().exception("XfeSpectrumBrick: problem updating embedded PyMCA")
+            print traceback.print_exc
+            traceback.print_exc
         self.spectrumStatus.setPaletteBackgroundColor(QColor(color))
 
         self.startSpectrumButton.commandDone()
