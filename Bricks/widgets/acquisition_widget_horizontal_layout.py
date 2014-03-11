@@ -183,7 +183,7 @@ class AcquisitionWidgetHorizontalLayout(QWidget):
         self.shutterless_cbx.setText(self.__tr("Shutterless"))
         self.overlap_label.setText(self.__tr("Oscillation overlap:"))
         self.num_passes_label.setText(self.__tr("Number of passes:"))
-        self.energy_label.setText(self.__tr("Energy (KeV):"))
+        self.energy_label.setText(self.__tr("Energy (keV):"))
         self.mad_cbox.setText(self.__tr("MAD"))
 
 

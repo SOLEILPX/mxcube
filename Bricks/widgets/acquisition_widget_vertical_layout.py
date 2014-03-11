@@ -181,7 +181,7 @@ class AcquisitionWidgetVerticalLayout(QWidget):
         self.num_images_label.setText(self.__tr("Number of images:"))
         self.num_passes_label.setText(self.__tr("Number of passes:"))
         self.exp_time_label.setText(self.__tr("Exposure time:"))
-        self.energy_label.setText(self.__tr("Energy (KeV):"))
+        self.energy_label.setText(self.__tr("Energy (keV):"))
         self.resolution_label.setText(self.__trUtf8("\x52\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e\x20\x28\xc3\x85\x29\x3a"))
         self.transmission_label.setText(self.__tr("Transmission (%):"))
         self.mad_cbox.setText(self.__tr("MAD"))

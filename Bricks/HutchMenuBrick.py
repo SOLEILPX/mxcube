@@ -5,6 +5,7 @@ import logging
 import MiniDiff
 import CommandMenuBrick
 import os
+import time
 import tempfile
 
 from Qub.Objects.QubDrawingManager import QubPointDrawingMgr, Qub2PointSurfaceDrawingMgr, QubAddDrawing
@@ -43,7 +44,7 @@ class HutchMenuBrick(BlissWidget):
         self.sampleChanger=None
         self.collectObj = None
         self.queue_hwobj = None
-        self._bx, self._by = (None, None)
+        self._bx, self._by = (0, 0)
         #self.allowMoveToBeamCentring = False
 
         # Define properties
@@ -597,7 +598,11 @@ class HutchMenuBrick(BlissWidget):
             if self.minidiff and self.minidiff.isReady():
                 beam_xc = self.minidiff.getBeamPosX()
                 beam_yc = self.minidiff.getBeamPosY()
-                self.emit(PYSIGNAL("beamPositionChanged"), (beam_xc, beam_yc))    
+                pxmmy=self.minidiff.pixelsPerMmY
+                pxmmz=self.minidiff.pixelsPerMmZ
+
+                self.emit(PYSIGNAL("beamPositionChanged"), (beam_xc, beam_yc,
+                                                            self._bx, self._by))
         elif signalName=='calibrationChanged':
             if self.minidiff and self.minidiff.isReady():
                 try:
@@ -613,13 +618,14 @@ class HutchMenuBrick(BlissWidget):
             pxmmz=self.minidiff.pixelsPerMmZ
             beam_xc = self.minidiff.getBeamPosX()
             beam_yc = self.minidiff.getBeamPosY()
-            self.emit(PYSIGNAL("beamPositionChanged"), (beam_xc, beam_yc))
         except:
             pxmmy=None
             pxmmz=None 
         if pxmmy is not None and pxmmz is not None:
             self.sampleCentreBox.setEnabled(True)
             self.updateBeam()
+            self.emit(PYSIGNAL("beamPositionChanged"), (beam_xc, beam_yc,
+                                                        self._bx, self._by))
         else:
             self.miniDiffNotReady()
 
@@ -741,19 +747,18 @@ class HutchMenuBrick(BlissWidget):
 
     def updateBeam(self,force=False):
         if self["displayBeam"]:
+              if not self.minidiff.isReady(): time.sleep(0.2)
               beam_x = self.minidiff.getBeamPosX()
               beam_y = self.minidiff.getBeamPosY()
-              print "===> HutchMenuBrick.py: updateBeam", beam_x, beam_y
+              try:
+                 self.__rectangularBeam.set_xMid_yMid(beam_x,beam_y)
+              except AttributeError:
+                 pass
               try:
                 self.__beam.move(beam_x, beam_y)
                 #self.__rectangularBeam.move(beam_x, beam_y)
                 try:
-                  get_beam_info = self.minidiff.getBeamInfo #getCommandObject("getBeamInfo")
-                  if force or get_beam_info: #.isSpecReady():
-                      self._updateBeam({"size_x":0.045, "size_y":0.025, "shape": "rectangular"})
-                      #self._updateBeam({"size_x":100, "size_y":50, "shape": "elliptical"})
-                      #self.minidiff.getBeamInfo( callback= self._updateBeam, error_callback=None)
-                      #get_beam_info(callback=self._updateBeam, error_callback=None)
+                  self.minidiff.getBeamInfo(self._updateBeam)
                 except:
                   logging.getLogger().exception("Could not get beam size: cannot display beam")
                   self.__beam.hide()
@@ -790,17 +795,9 @@ class HutchMenuBrick(BlissWidget):
                     self.__scaleY = pxsize_z
                 else:
                     self.emit(PYSIGNAL("calibrationChanged"), (pxsize_y, pxsize_z))
-                    self._drawBeam()
+                    self.updateBeam(True)
+                    #self._drawBeam()
                     self.__scale.show()
-            self.updateBeam(True)
-            # PL_2014_01_19
-            #if self.minidiff is not None:
-            #    self._bx = self.minidiff.beamPositionX
-            #    self._by = self.minidiff.beamPositionY
-                # 
-            #    self.emit(PYSIGNAL("beamPositionChanged"), (self._bx, self._by))
-            #    self._drawBeam()
-               
 
     # Slits changed: update beam size
     def slitsPositionChanged(self, *args):
