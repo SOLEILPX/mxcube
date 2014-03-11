@@ -26,6 +26,7 @@ if "CUSTOM_HARDWARE_OBJECTS_PATH" in os.environ:
    hwopaths.append( os.environ["CUSTOM_HARDARE_OBJECTS_PATH"] )
 hwopaths.append( os.path.join(MXCUBE_ROOT,"HardwareObjects") )
 hwopaths.append( os.path.join(MXCUBE_ROOT,"HardwareObjects/SOLEIL") )
+hwopaths.append( os.path.join(MXCUBE_ROOT,"HardwareObjects/sample_changer") )
 hwopaths.append( os.path.join(MXCUBE_ROOT,"HardwareRepository/HardwareObjects") )
 
 CUSTOM_HARDWARE_OBJECTS_PATH = ":".join( hwopaths )
