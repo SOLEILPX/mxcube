@@ -178,7 +178,8 @@ class AcquisitionWidget(qt.QWidget):
         has_shutter_less = self._beamline_setup.detector_has_shutterless()
         self.acq_widget_layout.child('shutterless_cbx').\
              setEnabled(has_shutter_less)
-        self.acq_widget_layout.child('shutterless_cbx').setOn(has_shutter_less)
+
+        #self.acq_widget_layout.child('shutterless_cbx').setOn(has_shutter_less)
 
         if self._beamline_setup.disable_num_passes():
             self.acq_widget_layout.child('num_passes_ledit').setDisabled(True)

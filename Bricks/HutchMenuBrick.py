@@ -362,7 +362,7 @@ class HutchMenuBrick(BlissWidget):
     def acceptClicked(self):
         if self.standardColor is not None:
             self.buttonAccept.setPaletteBackgroundColor(self.standardColor)
-        logging.info("disabling accept because accept was clicked")  
+        #logging.info("disabling accept because accept was clicked")  
         self.buttonAccept.setEnabled(False)
         self.buttonReject.setEnabled(False)
         self.minidiff.acceptCentring()
@@ -370,7 +370,7 @@ class HutchMenuBrick(BlissWidget):
     def rejectClicked(self):
         if self.standardColor is not None:
             self.buttonReject.setPaletteBackgroundColor(self.standardColor)
-        logging.info("disabling accept because reject was clicked")  
+        #logging.info("disabling accept because reject was clicked")  
         self.buttonReject.setEnabled(False)
         self.buttonAccept.setEnabled(False)
         self.minidiff.rejectCentring()
@@ -459,7 +459,7 @@ class HutchMenuBrick(BlissWidget):
         self.__pointer.stopDrawing()
         self.__pointer.hide()
 
-        logging.info("HutchMenuBrick:  centringSuccesful received")
+        #logging.info("HutchMenuBrick:  centringSuccesful received")
 
         self.clickedPoints=[]
         self.emitWidgetSynchronize()
@@ -469,7 +469,6 @@ class HutchMenuBrick(BlissWidget):
             #    self.currentCentring.setPaletteBackgroundColor(self.defaultBackgroundColor)
             self.currentCentring=None
 
-        logging.info("HutchMenuBrick:  enabling buttons")
         self.buttonAccept.setEnabled(True)
         self.buttonReject.setEnabled(True)
         if self.insideDataCollection:
@@ -593,9 +592,12 @@ class HutchMenuBrick(BlissWidget):
             pass
 
     def connectNotify(self, signalName):
+        print "..... HutchMenuBrick:connectNotify  ", signalName
         if signalName=='beamPositionChanged':
             if self.minidiff and self.minidiff.isReady():
-    	        self.emit(PYSIGNAL("beamPositionChanged"), (self.minidiff.imgWidth/2, self.minidiff.imgHeight/2))
+                beam_xc = self.minidiff.getBeamPosX()
+                beam_yc = self.minidiff.getBeamPosY()
+                self.emit(PYSIGNAL("beamPositionChanged"), (beam_xc, beam_yc))    
         elif signalName=='calibrationChanged':
             if self.minidiff and self.minidiff.isReady():
                 try:
@@ -609,7 +611,9 @@ class HutchMenuBrick(BlissWidget):
         try:
             pxmmy=self.minidiff.pixelsPerMmY
             pxmmz=self.minidiff.pixelsPerMmZ
-            self.emit(PYSIGNAL("beamPositionChanged"), (self.minidiff.imgWidth/2, self.minidiff.imgHeight/2))
+            beam_xc = self.minidiff.getBeamPosX()
+            beam_yc = self.minidiff.getBeamPosY()
+            self.emit(PYSIGNAL("beamPositionChanged"), (beam_xc, beam_yc))
         except:
             pxmmy=None
             pxmmz=None 
@@ -675,6 +679,7 @@ class HutchMenuBrick(BlissWidget):
             self.__rectangularBeam.setSlitboxSize(0,0)
             self.__rectangularBeam.setColor(Qt.red)
             self.__rectangularBeam.setSlitboxPen(QPen(Qt.blue))
+            self.__rectangularBeam.set_xMid_yMid(self.minidiff.beam_xc, self.minidiff.beam_yc)
 
             self.__beam, _ = QubAddDrawing(self.__drawing, QubContainerDrawingMgr, QubCanvasBeam) 
             self.__beam.setPen(QPen(Qt.blue))
@@ -696,7 +701,7 @@ class HutchMenuBrick(BlissWidget):
             except AttributeError:
                 pass
             else:
-		self.emit(PYSIGNAL("calibrationChanged"), (self.__scaleX, self.__scaleY))
+                self.emit(PYSIGNAL("calibrationChanged"), (self.__scaleX, self.__scaleY))
                 self.slitsPositionChanged()
                 self.updateBeam(force=True)
         except:
@@ -705,14 +710,21 @@ class HutchMenuBrick(BlissWidget):
     def _drawBeam(self):
         try:
           self.__rectangularBeam.show()
-          if None in (self._by, self._bx):
-            return
-          bx = self._bx
-          by = self._by
           pxmmy=self.minidiff.pixelsPerMmY
           pxmmz=self.minidiff.pixelsPerMmZ
+          bx = self._bx
+          by = self._by
+          if None in (bx, by, pxmmy, pxmmz):
+              return
           if self._bshape == "rectangular":
-            self.__rectangularBeam.setSlitboxSize(bx*pxmmy, by*pxmmz)
+                self.__rectangularBeam.setSlitboxSize(bx*pxmmy, by*pxmmz)
+                #self.__rectangularBeam.move(self.minidiff.beam_xc,
+                #                            self.minidiff.beam_yc)
+                self.__rectangularBeam.set_xMid_yMid(self.minidiff.beam_xc,
+                                            self.minidiff.beam_yc)
+                #self.__beam.show()
+            #self.__beam.setSize(bx*pxmmy, by*pxmmz)
+            #self.__beam.show()
           else:
             self.__rectangularBeam.setSlitboxSize(0,0)
             self.__beam.setSize(bx*pxmmy, by*pxmmz)
@@ -729,14 +741,19 @@ class HutchMenuBrick(BlissWidget):
 
     def updateBeam(self,force=False):
         if self["displayBeam"]:
-              beam_x, beam_y = (self.minidiff.imgWidth/2, self.minidiff.imgHeight/2)
+              beam_x = self.minidiff.getBeamPosX()
+              beam_y = self.minidiff.getBeamPosY()
+              print "===> HutchMenuBrick.py: updateBeam", beam_x, beam_y
               try:
                 self.__beam.move(beam_x, beam_y)
+                #self.__rectangularBeam.move(beam_x, beam_y)
                 try:
-                  #get_beam_info = self.minidiff.getCommandObject("getBeamInfo")
-                  if force or get_beam_info.isSpecReady():
-                    self.minidiff.getBeamInfo( callback= self._updateBeam, error_callback=None)
-                    #get_beam_info(callback=self._updateBeam, error_callback=None)
+                  get_beam_info = self.minidiff.getBeamInfo #getCommandObject("getBeamInfo")
+                  if force or get_beam_info: #.isSpecReady():
+                      self._updateBeam({"size_x":0.045, "size_y":0.025, "shape": "rectangular"})
+                      #self._updateBeam({"size_x":100, "size_y":50, "shape": "elliptical"})
+                      #self.minidiff.getBeamInfo( callback= self._updateBeam, error_callback=None)
+                      #get_beam_info(callback=self._updateBeam, error_callback=None)
                 except:
                   logging.getLogger().exception("Could not get beam size: cannot display beam")
                   self.__beam.hide()
@@ -747,7 +764,7 @@ class HutchMenuBrick(BlissWidget):
     # Zoom changed: update pixels per mm
     def zoomPositionChanged(self,position,offset):
         pxmmy, pxmmz, pxsize_y, pxsize_z = None,None,None,None
-
+        print "** HutchMenuBrick: zoomPositionChanged", position,offset
         if offset is None:
           # unknown zoom pos.
           try:
@@ -755,6 +772,7 @@ class HutchMenuBrick(BlissWidget):
             self.__rectangularBeam.hide()
             self.__beam.hide()
           except AttributeError:
+            print "&&& zoomPositionChanged AttributeError"
             self.__scaleX = None
             self.__scaleY = None
         else:
@@ -764,7 +782,6 @@ class HutchMenuBrick(BlissWidget):
                 if pxmmy is not None and pxmmz is not None:
                     pxsize_y = 1e-3 / pxmmy
                     pxsize_z = 1e-3 / pxmmz
-
                 try:
                     self.sx(pxsize_y)
                     self.sy(pxsize_z)
@@ -775,6 +792,14 @@ class HutchMenuBrick(BlissWidget):
                     self.emit(PYSIGNAL("calibrationChanged"), (pxsize_y, pxsize_z))
                     self._drawBeam()
                     self.__scale.show()
+            self.updateBeam(True)
+            # PL_2014_01_19
+            #if self.minidiff is not None:
+            #    self._bx = self.minidiff.beamPositionX
+            #    self._by = self.minidiff.beamPositionY
+                # 
+            #    self.emit(PYSIGNAL("beamPositionChanged"), (self._bx, self._by))
+            #    self._drawBeam()
                
 
     # Slits changed: update beam size

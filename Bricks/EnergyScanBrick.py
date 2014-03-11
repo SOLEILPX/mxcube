@@ -89,13 +89,18 @@ class EnergyScanBrick(BlissWidget):
         self.defineSignal('energyScanConnected',())
         self.defineSignal('energyScanCanMove',())
         self.defineSignal('edgeScanEnergies',())
+        self.defineSignal('addNewPoint',())
+        self.defineSignal('newScan',())
+        self.defineSignal('setDirectory',())
+        self.defineSignal('setValues',())
 
         self.parametersBox = QHGroupBox("Parameters",self)
-        self.parametersBox.hide()
+        #self.parametersBox.hide()
         self.parametersBox.setInsideMargin(4)
         self.parametersBox.setInsideSpacing(2)
         self.parametersBox.setCheckable(True)
-        self.parametersBox.setChecked(False)
+#        self.parametersBox.setChecked(False)
+        self.parametersBox.setChecked(True)
 
         QLabel("Prefix:",self.parametersBox)
         self.prefixInput=QLineEdit(self.parametersBox)
@@ -115,14 +120,14 @@ class EnergyScanBrick(BlissWidget):
         self.scanBox=QHGroupBox("Energy scan",self)
         self.scanBox.setInsideMargin(4)
         self.scanBox.setInsideSpacing(2)
-        self.scanBox.hide()
+        #self.scanBox.hide()
         self.startScanButton=MenuButton(self.scanBox,"Start scan")
-        self.startScanButton.hide()
+        #self.startScanButton.hide()
         self.connect(self.startScanButton,PYSIGNAL('executeCommand'),self.startEnergyScan)
         self.connect(self.startScanButton,PYSIGNAL('cancelCommand'),self.cancelEnergyScan)
 
         self.statusBox=QHGroupBox("(no element)",self.scanBox)
-        self.statusBox.hide()
+        #self.statusBox.hide()
         #self.statusBox.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.MinimumExpanding)
         self.statusBox.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
         self.statusBox.setAlignment(QGroupBox.AlignCenter)
@@ -174,7 +179,7 @@ class EnergyScanBrick(BlissWidget):
         self.acceptBox.setSpacing(2)
         self.acceptButton=MenuButton2(self.acceptBox,"Accept")
         self.resetButton=MenuButton2(self.acceptBox,"Reset")
-        self.acceptBox.hide()
+        #self.acceptBox.hide()
         QObject.connect(self.resetButton,SIGNAL('clicked()'),self.resetEnergies)
         QObject.connect(self.acceptButton,SIGNAL('clicked()'),self.acceptEnergies)
 
@@ -192,7 +197,7 @@ class EnergyScanBrick(BlissWidget):
         self.layout().addWidget(self.scanBox)
         self.layout().addWidget(self.choochGraphs)
 
-        self.setEnabled(False)
+        self.setEnabled(True)
 
     def setIcons(self,icons):
         icons_list=icons.split()
@@ -323,17 +328,20 @@ class EnergyScanBrick(BlissWidget):
                 self.disconnect(self.energyScan, 'energyScanReady', self.scanReady)
                 self.disconnect(self.energyScan, 'connected', self.connected)
                 self.disconnect(self.energyScan, 'disconnected', self.disconnected)
+                self.disconnect(self.energyScan, 'addNewPoint', self.addNewPoint)
+                self.disconnect(self.energyScan, 'newScan', self.newScan)
+                self.disconnect(self.energyScan, 'setDirectory', self.setDirectory)
 
             self.clearEnergies()
             self.energyScan = self.getHardwareObject(newValue)
             if self.energyScan is not None:
 		self.scanObject = None
-		try:
-                  specversion = self.energyScan.getCommandObject("doEnergyScan").specVersion
-                except:
-                  logging.getLogger().exception("%s: could not get spec version from Energy Scan Hardware Object", self.name())
-                else:
-                  self.scanObject = QSpecScan(specversion)
+		#try:
+                #  specversion = self.energyScan.getCommandObject("doEnergyScan").specVersion
+                #except:
+                #  logging.getLogger().exception("%s: could not get spec version from Energy Scan Hardware Object", self.name())
+                #else:
+                #  self.scanObject = QSpecScan(specversion)
 
                 self.connect(self.energyScan, 'energyScanStarted', self.scanStarted)
                 self.connect(self.energyScan, 'energyScanFinished', self.scanFinished)
@@ -343,6 +351,9 @@ class EnergyScanBrick(BlissWidget):
                 self.connect(self.energyScan, 'connected', self.connected)
                 self.connect(self.energyScan, 'disconnected', self.disconnected)
                 self.connect(self.energyScan, 'chooch_finished', self.chooch_finished)
+                self.connect(self.energyScan, 'addNewPoint', self.addNewPoint)
+                self.connect(self.energyScan, 'newScan', self.newScan)
+                self.connect(self.energyScan, 'setDirectory', self.setDirectory)
 
                 if self.energyScan.isConnected():
                     self.connected()
@@ -461,55 +472,56 @@ class EnergyScanBrick(BlissWidget):
         self.choochGraphs.newcurve("fp", chooch_graph_x, chooch_graph_y2)
         self.choochGraphs.replot()
 
-    def scanFinished(self, *args):
-        pass
-     #    color=EnergyScanBrick.STATES['ok']
-  
-#         try:
-#           smis_name=os.environ["SMIS_BEAMLINE_NAME"].lower()
-#           x,y=smis_name.split("-")
-#           bldir=x+"eh"+y
-#         except:
-#           bldir=os.environ["SMIS_BEAMLINE_NAME"].lower()
+#    def scanFinished(self, *args):
+    def scanFinished(self, scanData):
+        print "EnergyScanBrick : scanCommandFinished scanData = " , scanData
+        color=EnergyScanBrick.STATES['ok']
+        self.scanStatusChanged("scan finished")
 
-#         import pdb
-#         pdb.set_trace()
-#         self.element = (self.energyScan._element, self.energyScan._edge)
+        scanDesc = scanData
+        print 'self.scanObject', self.scanObject
+        pk, fppPeak, fpPeak, ip, fppInfl, fpInfl, rm, \
+        chooch_graph_x, chooch_graph_y1, chooch_graph_y2, \
+        title = \
+        self.energyScan.doChooch(self.scanObject, scanDesc)
+                                     
+                                 #self.element[0], 
+                                 #self.element[1])
+                                 #, 
+                                 #scanArchiveFilePrefix = 'scanArchiveFilePrefix' , 
+                                 #scanFilePrefix = 'scanFilePrefix')
 
-#         scanArchiveFilePrefix="/data/pyarch/%s/%s/%s_escan_%s" % (bldir, self.archive_directory, self.prefixInput.text(), "_".join(self.element))
-#         i=1
-#         while os.path.isfile(os.path.extsep.join((scanArchiveFilePrefix+str(i), "raw"))):
-#             i=i+1
-        
-#         scanArchiveFilePrefix = scanArchiveFilePrefix+str(i) 
-#         scanFilePrefix = os.path.join(str(self.directoryInput.text()), os.path.basename(scanArchiveFilePrefix))
-        
-#         pk, fppPeak, fpPeak, ip, fppInfl, fpInfl, rm, chooch_graph_x, chooch_graph_y1, chooch_graph_y2, title = self.energyScan.doChooch(self.scanObject, self.element[0], self.element[1], scanArchiveFilePrefix, scanFilePrefix)
+        # display Chooch graphs
+        self.choochGraphs.setTitle(title) 
+        self.choochGraphs.newcurve("spline", chooch_graph_x, chooch_graph_y1)
+        self.choochGraphs.newcurve("fp", chooch_graph_x, chooch_graph_y2)
+        self.choochGraphs.replot()
 
-#         # display Chooch graphs
-#         self.choochGraphs.setTitle(title) 
-#         self.choochGraphs.newcurve("spline", chooch_graph_x, chooch_graph_y1)
-#         self.choochGraphs.newcurve("fp", chooch_graph_x, chooch_graph_y2)
-#         self.choochGraphs.replot()
+        # display Chooch results
+        energy_str=self['formatString'] % pk
+        self.peakInput.setText(energy_str)
+        energy_str=self['formatString'] % ip
+        self.inflectionInput.setText(energy_str)
+        energy_str=self['formatString'] % rm
+        self.remoteInput.setText(energy_str)
 
-#         # display Chooch results
-#         energy_str=self['formatString'] % pk
-#         self.peakInput.setText(energy_str)
-#         energy_str=self['formatString'] % ip
-#         self.inflectionInput.setText(energy_str)
-#         energy_str=self['formatString'] % rm
-#         self.remoteInput.setText(energy_str)
+        self.scanStatus.setPaletteBackgroundColor(QColor(color))
 
-#         self.scanStatus.setPaletteBackgroundColor(QColor(color))
+        self.startScanButton.commandDone()
+        self.emit(PYSIGNAL("energyScanning"),(False,))
+        self.parametersBox.setEnabled(True)
+        self.acceptBox.setEnabled(True)
+        self.inflectionInput.setEnabled(True)
+        self.peakInput.setEnabled(True)
+        self.remoteInput.setEnabled(True)
+        self.remote2Input.setEnabled(True)
 
-#         self.startScanButton.commandDone()
-#         self.emit(PYSIGNAL("energyScanning"),(False,))
-#         self.parametersBox.setEnabled(True)
-#         self.acceptBox.setEnabled(True)
-#         self.inflectionInput.setEnabled(True)
-#         self.peakInput.setEnabled(True)
-#         self.remoteInput.setEnabled(True)
-#         self.remote2Input.setEnabled(True)
+
+    def addNewPoint(self,x,y):
+        self.emit(PYSIGNAL('addNewPoint'), (x,y))
+    
+    def newScan(self,scanParameters):
+        self.emit(PYSIGNAL('newScan'), (scanParameters,))
 
     def clearEnergies(self):
         self.inflectionInput.setText("")
