@@ -2,7 +2,7 @@
 import logging
 import HutchMenuBrick
 
-	__category__ = 'SOLEIL'
+__category__ = 'SOLEIL'
 
 ###
 ### Sample centring brick
