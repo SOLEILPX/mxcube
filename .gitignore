@@ -2,3 +2,7 @@
 *.swp
 *~
 mxcube.gui
+*current
+*saved
+*old
+,out

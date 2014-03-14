@@ -11,7 +11,7 @@ from BlissFramework import BaseComponents
 from widgets.catswidget import CatsWidget
 
 
-__category__ = 'SC'            
+__category__ = "SC"
 
     
 class CatsBrick(BaseComponents.BlissWidget):
