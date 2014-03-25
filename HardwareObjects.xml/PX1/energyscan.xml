@@ -1,4 +1,4 @@
-<equipment class="EnergyScan">
+<equipment class="EnergyScanPX1">
     <tangoname>/BLEnergy</tangoname> 
     <blenergy>i10-c-c00/ex/beamlineenergy</blenergy>
     <mono>i10-c-c02/op/mono1</mono>
