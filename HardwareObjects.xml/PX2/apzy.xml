@@ -40,6 +40,13 @@
             <apz>0.00695</apz>
         </position>
         <position>
+            <name>100 um</name>
+            <aperture_size>100</aperture_size>
+            <aperture_coef>0.558</aperture_coef>
+            <apy>-0.000444444444444</apy>
+            <apz>0.00695</apz>
+        </position>
+        <position>
             <name>Outbeam</name>
             <aperture_size>-1</aperture_size>
             <aperture_coef>1</aperture_coef>

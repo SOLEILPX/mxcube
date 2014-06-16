@@ -1,6 +1,6 @@
 <!-- md2-zoomlevel has zoomlevel, backlightlevel and the frontlinelevel but not pixelsize and beamposition -->
 <!-- <?xml version="1.0" encoding="iso-8859-1"?> -->
-<device class="TangoMotorMD2PhasesWPositionsPX2">
+<device class="TangoDCMotorWPositions">
     <username>MD2 Phase</username>
     <tangoname>i11-ma-cx1/ex/md2</tangoname> <!--check!-->
     <channel type="tango" polling="1000" name="state">State</channel>

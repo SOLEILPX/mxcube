@@ -3,15 +3,15 @@
 <object class="BeamlineSetup" role="BeamlineSetup">
 
   <!-- Objects directly associatd with hardware -->
-  <object href="/transmission-mockup"   role="transmission"/>
-  <object href="/minidiff" role="diffractometer"/>
-  <object href="/sc-mockup"             role="sample_changer"/>    
-  <object href="/resolution-mockup"     role="resolution"/>
+  <object href="/transmission"  role="transmission"/>
+  <object href="/minidiff"      role="diffractometer"/>
+  <object href="/cats"          role="sample_changer"/>    
+  <object href="/resolution"    role="resolution"/>
 
   <!-- Software (abstract) concepts -->
   <object href="/shape-history"      role="shape_history"/>
   <object href="/session"            role="session"/>
-  <!-- object href="/lims-client-mockup" role="lims_client"/ -->
+  <object href="/dbconnection-mockup"  role="lims_client" />
   <object href="/data-analysis"      role="data_analysis"/>
   <object href="/mxcollect"          role="collect"/>
  
@@ -19,7 +19,7 @@
   <!--<object href="/workflow-mockup" role="workflow"/> -->
  
   <!-- Procedures and routines -->
-  <object href="/energyscan-mockup" role="energy"/>
+  <object href="/energyscan" role="energy"/>
   <!-- object href="/collect-mockup" role="collect"/ --> 
 
   <!-- Is it possible to change the beam wavelentgh.
@@ -33,19 +33,20 @@
   <!-- Should be moved to a detector object in the future -->
   <detector>
     <manufacturer>DECTRIS</manufacturer>
-    <type>pilatus</type>
-    <model>6M_F</model>
-    <px>0.172</px>
-    <py>0.172</py>
+    <type>ADSC</type>
+    <model>Quantum315</model>
+    <px>0.102592</px>
+    <py>0.102592</py>
     <cansum>yes</cansum>
-    <has_shutterless>True</has_shutterless>
+    <has_shutterless>False</has_shutterless>
   </detector>
 
   <!-- Default values for an acquisition -->
   <default_acquisition_values>
-    <exposure_time>0.037</exposure_time>
+    <exposure_time>0.5</exposure_time>
+    <energy>12.65</energy>
     <start_angle>0.0</start_angle>
-    <range>0.1</range>
+    <range>0.5</range>
     <number_of_passes>1</number_of_passes>
     <start_image_number>1</start_image_number>
     <run_number>1</run_number>
@@ -56,7 +57,7 @@
 
   <!-- Default values for a characterization -->
   <default_characterisation_values>
-    <exposure_time>0.037</exposure_time>
+    <exposure_time>0.5</exposure_time>
     <start_angle>0.0</start_angle>
     <range>1</range>
     <number_of_passes>1</number_of_passes>
