@@ -89,7 +89,7 @@ class CreateCharWidget(CreateTaskBase):
 
         space_group_ledit = self._vertical_dimension_widget.\
                             child('space_group_ledit')
-        
+       
         self._char_params_mib.bind_value_update('opt_sad',
                                                 optimised_sad_cbx,
                                                 bool, None)
@@ -198,7 +198,7 @@ class CreateCharWidget(CreateTaskBase):
 
             try:
                 energy = self._beamline_setup_hwobj.energy_hwobj.getCurrentEnergy()
-                energy = round(float(energy), 2)
+                energy = round(float(energy), 4)
             except AttributeError:
                 energy = 0
 
@@ -245,6 +245,8 @@ class CreateCharWidget(CreateTaskBase):
             data_collection = self._char.reference_image_collection
 
             self._char_params = self._char.characterisation_parameters
+            self._char_params_mib.set_model(self._char_params)
+
             self._acquisition_parameters = data_collection.acquisitions[0].\
                                            acquisition_parameters
 
