@@ -7,7 +7,7 @@ from sample_changer import SC3
 from sample_changer_helper import *
 from qt import *
 
-__category__ = "mxCuBE"
+__category__ = "SOLEIL"
 
 class VialView(QWidget):
     (VIAL_UNKNOWN,VIAL_NONE,VIAL_NOBARCODE,VIAL_BARCODE,VIAL_AXIS,VIAL_ALREADY_LOADED,VIAL_NOBARCODE_LOADED)=(0,1,2,3,4,5,6)
@@ -650,7 +650,7 @@ class ScanBasketsView(QWidget):
         else:
             self.buttonSelect.hide()
 
-class SampleChangerBrick3(BlissWidget):
+class SampleChangerSoleilBrick(BlissWidget):
     def __init__(self, *args):
         BlissWidget.__init__(self, *args)
 

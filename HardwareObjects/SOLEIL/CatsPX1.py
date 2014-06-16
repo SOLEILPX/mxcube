@@ -74,6 +74,10 @@ class CatsPX1(SampleChanger):
         self._propSamplesPerPuck = self.getProperty('samples_per_puck')
         self._propHolderLength   = self.getProperty('holder_length')
 
+        self.currentBasketDataMatrix = "this-is-not-a-matrix"
+        self.currentSample = "this-is-not-a-sample"
+        self.currentBasket = "this-is-not-a-basket"
+
         if self._propNoOfLids is not None:
             try:
                 CatsPX1.NO_OF_LIDS = int(self._propNoOfLids)
@@ -132,6 +136,8 @@ class CatsPX1(SampleChanger):
         
     #########################           TASKS           #########################
 
+    def getLoadedSampleDataMatrix(self):
+        return "-not-a-matrix-"
     def _doUpdateInfo(self):       
         """
         Updates the sample changers status: mounted pucks, state, currently loaded sample

@@ -8,8 +8,6 @@ import ShapeHistory as shape_history
 
 from create_task_base import CreateTaskBase
 from widgets.data_path_widget import DataPathWidget
-from widgets.data_path_widget_vertical_layout import\
-    DataPathWidgetVerticalLayout
 from widgets.acquisition_widget import AcquisitionWidget
 from widgets.processing_widget import ProcessingWidget
 
@@ -46,19 +44,29 @@ class CreateHelicalWidget(CreateTaskBase):
         self._list_box = qt.QListBox(self._lines_gbox, "helical_page")
         self._list_box.setSelectionMode(qt.QListBox.Extended)
         self._list_box.setFixedWidth(175)
+        self._list_box.setFixedHeight(50)
+        list_box_tool_tip = "Select the line(s) to perfrom helical scan on"
+        qt.QToolTip.add(self._list_box, list_box_tool_tip)
 
         lines_gbox_layout.addWidget(self._list_box)
 
         button_layout = qt.QVBoxLayout(None, 0, 6, "button_layout")
-        button_layout.setSpacing(20)
+        button_layout.setSpacing(5)
         add_button = qt.QPushButton("+", self._lines_gbox, "add_button")
-        add_button.setFixedWidth(25)
+        add_button.setFixedWidth(20)
+        add_button.setFixedHeight(20)
         remove_button = qt.QPushButton("-", self._lines_gbox, "add_button")
-        remove_button.setFixedWidth(25)
+        remove_button.setFixedWidth(20)
+        remove_button.setFixedHeight(20)        
         button_layout.addWidget(add_button)
         button_layout.addWidget(remove_button)
         lines_gbox_layout.addLayout(button_layout)
 
+        add_button_tool_tip = "Add a line between two saved positions, " \
+                              "CTRL click to select more than one position"
+        qt.QToolTip.add(add_button, add_button_tool_tip)
+        remove_button_tool_tip = "Remove selected line(s)"
+        qt.QToolTip.add(remove_button, remove_button_tool_tip)
 
         self._acq_gbox = qt.QVGroupBox('Acquisition', self, 'acq_gbox')
         self._acq_widget = \
@@ -74,7 +82,7 @@ class CreateHelicalWidget(CreateTaskBase):
         self._data_path_widget = \
             DataPathWidget(self._data_path_gbox, 
                            data_model = self._path_template,
-                           layout = DataPathWidgetVerticalLayout)
+                           layout = 'vertical')
 
         self._processing_gbox = qt.QVGroupBox('Processing', self, 
                                               'processing_gbox')
@@ -98,10 +106,10 @@ class CreateHelicalWidget(CreateTaskBase):
                            self.list_box_selection_changed)
 
         prefix_ledit = self._data_path_widget.\
-                       data_path_widget_layout.prefix_ledit
+                       data_path_widget_layout.child('prefix_ledit')
 
         run_number_ledit = self._data_path_widget.\
-                           data_path_widget_layout.run_number_ledit
+                           data_path_widget_layout.child('run_number_ledit')
 
         self.connect(prefix_ledit, 
                      qt.SIGNAL("textChanged(const QString &)"), 
@@ -147,6 +155,11 @@ class CreateHelicalWidget(CreateTaskBase):
             self._shape_history.add_shape(line)
             list_box_item = qt.QListBoxText(self._list_box, 'Line')
             self._list_item_map[list_box_item] = line
+
+            # De select previous items
+            for item in self.selected_items():
+                self._list_box.setSelected(item, False)
+            
             self._list_box.setSelected(list_box_item, True)
 
     def remove_clicked(self):
@@ -189,7 +202,6 @@ class CreateHelicalWidget(CreateTaskBase):
     def list_box_selection_changed(self):
         self.show_selected_lines()
 
-
     def selected_items(self):
         selected_items = []
                 
@@ -205,9 +217,9 @@ class CreateHelicalWidget(CreateTaskBase):
         for list_item in self._list_item_map.keys():
             line = self._list_item_map[list_item]
             if list_item in selected_items:
-                line.highlight()
+                self._shape_history.select_shape(line)
             else:
-                line.unhighlight()
+                self._shape_history.de_select_shape(line)
 
     def approve_creation(self):
         base_result = CreateTaskBase.approve_creation(self)
@@ -218,7 +230,7 @@ class CreateHelicalWidget(CreateTaskBase):
             selected_lines = True
         else:
             logging.getLogger("user_level_log").\
-                info("No lines selected, please select one or more lines.")
+                warning("No lines selected, please select one or more lines.")
 
         return base_result and selected_lines 
             
@@ -233,29 +245,44 @@ class CreateHelicalWidget(CreateTaskBase):
         self._processing_widget.update_data_model(self._processing_parameters)
 
     def select_shape_with_cpos(self, start_cpos, end_cpos):
-        self._shape_history._drawing_event.de_select_all()
+        self._shape_history.de_select_all()
+        selected_line = None
 
         for shape in self._shape_history.get_shapes():
-            if len(shape.get_centred_positions()) == 2:
-                if shape.get_centred_positions()[0] is start_cpos and\
-                       shape.get_centred_positions()[1] is end_cpos:
-                    self._shape_history._drawing_event.set_selected(shape)
+            if isinstance(shape, shape_history.Line):
+                if shape.get_centred_positions()[0] == start_cpos and\
+                       shape.get_centred_positions()[1] == end_cpos:
+                    self._shape_history.select_shape(shape)
+                    selected_line = shape
 
+        #de-select previous selected list items and
+        #select the current shape (Line).
+        for (list_item, shape) in self._list_item_map.iteritems():
+
+            if selected_line is shape:
+                self._list_box.setSelected(list_item, True)
+            else:
+                self._list_box.setSelected(list_item, False)
 
     def single_item_selection(self, tree_item):
         CreateTaskBase.single_item_selection(self, tree_item)
                                                              
-        if isinstance(tree_item, queue_item.SampleQueueItem) or \
-               isinstance(tree_item, queue_item.DataCollectionGroupQueueItem):
-            self._acquisition_parameters = copy.deepcopy(self._acquisition_parameters)
+        if isinstance(tree_item, queue_item.SampleQueueItem):
             self._processing_parameters = copy.deepcopy(self._processing_parameters)
+            self._processing_widget.update_data_model(self._processing_parameters)
 
         elif isinstance(tree_item, queue_item.DataCollectionQueueItem):
             data_collection = tree_item.get_model()
 
             if data_collection.experiment_type == EXPERIMENT_TYPE.HELICAL:
-                self.setDisabled(False)
-                self._path_template = data_collection.acquisitions[0].path_template
+                if tree_item.get_model().is_executed():
+                    self.setDisabled(True)
+                else:
+                    self.setDisabled(False)
+
+                self._path_template = data_collection.get_path_template()
+                self._data_path_widget.update_data_model(self._path_template)
+                
                 self._acquisition_parameters = data_collection.acquisitions[0].\
                                                acquisition_parameters
 
@@ -267,13 +294,12 @@ class CreateHelicalWidget(CreateTaskBase):
 
                     self.select_shape_with_cpos(start_cpos, end_cpos)
 
-                self._energy_scan_result = qmo.EnergyScanResult()
-                self._processing_parameters = data_collection.processing_parameters
-                self._energy_scan_result = data_collection.crystal.energy_scan_result
-                self._acq_widget.set_energies(self._energy_scan_result)
-                self._processing_widget.update_data_model(self._processing_parameters)
                 self._acq_widget.update_data_model(self._acquisition_parameters,
                                                    self._path_template)
+                self.get_acquisition_widget().use_osc_start(True)
+                
+                self._processing_parameters = data_collection.processing_parameters
+                self._processing_widget.update_data_model(self._processing_parameters)
             else:
                 self.setDisabled(True)
         else:
@@ -289,11 +315,6 @@ class CreateHelicalWidget(CreateTaskBase):
   
     def _create_task(self,  sample, shape):
         data_collections = []
-        #selected_items = self.selected_items()
-
-        #for item in selected_items:
-        #    shape = self._list_item_map[item]
-        #    snapshot = None
 
         if isinstance(shape, shape_history.Line ):
             if shape.get_qub_objects() is not None:
@@ -308,12 +329,17 @@ class CreateHelicalWidget(CreateTaskBase):
             start_acq.acquisition_parameters.collect_agent = \
                 COLLECTION_ORIGIN.MXCUBE
             start_acq.acquisition_parameters.\
-                centred_position = shape.start_cpos
+                centred_position = copy.deepcopy(shape.start_cpos)
             start_acq.path_template = copy.deepcopy(self._path_template)
             start_acq.acquisition_parameters.centred_position.\
                 snapshot_image = snapshot
 
             start_acq.path_template.suffix = self._session_hwobj.suffix
+
+            if self._beamline_setup_hwobj.in_plate_mode():
+                start_acq.acquisition_parameters.take_snapshots = False
+            else:
+                start_acq.acquisition_parameters.take_snapshots = True
 
             if '<sample_name>' in start_acq.path_template.directory:
                 name = sample.get_name().replace(':', '-')

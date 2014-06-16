@@ -1,6 +1,23 @@
-<device class="Scintillator">
-  <specversion>SPEC_HOST:SPEC_VERSION</specversion>
-  <command type="spec" name="set in">yagin</command>
-  <command type="spec" name="set out">yagout</command>
-  <channel type="spec" name="dev_state">YAG_STATE</channel>
+<device class="TangoDCMotorWPositions">
+    <username>Scintillator Position</username>
+    <tangoname>i11-ma-cx1/ex/md2</tangoname>
+    <channel type="tango" polling="1000" name="state">State</channel>
+    <datatype>int</datatype>
+    <channel type="tango" tangoname="i11-ma-cx1/ex/md2" polling="1000" name="position">ScintilPDPredefinedPosition</channel>
+    <delta>0.1</delta>
+    <interval>1000</interval>
+    <positions>
+        <position>
+            <username>Beam</username>
+            <offset>1</offset>
+        </position>
+        <position>
+            <username>Off</username>
+            <offset>2</offset>
+        </position>
+        <position>
+            <username>Cover</username>
+            <offset>3</offset>
+        </position>
+    </positions>
 </device>

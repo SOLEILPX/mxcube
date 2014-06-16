@@ -1,3 +1,4 @@
+import os
 import qt
 import queue_model_objects_v1 as queue_model_objects
 import logging
@@ -25,6 +26,7 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
         self.diffractometer_hwobj = None
         self.beamline_setup = None
         self.queue_model_hwobj = None
+        self.session_hwobj = None
         
         #Signals
         self.defineSignal("getView", ())
@@ -37,12 +39,13 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
         self.defineSlot("new_centred_position", ())
         self.defineSlot("change_pixel_calibration", ())
         self.defineSlot("change_beam_position", ())
+        self.defineSlot("user_group_saved", ())
 
         # Layout
         self.task_tool_box_widget = TaskToolBoxWidget(self)
         qt.QVBoxLayout(self)
         self.layout().addWidget(self.task_tool_box_widget)
-        self.setDisabled(not self.ispyb_logged_in)
+        self.setEnabled(self.ispyb_logged_in)
 
 
     def run(self):
@@ -61,6 +64,7 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
         d = {}
         self.emit(qt.PYSIGNAL("getView"), (d, ))
         self.task_tool_box_widget.workflow_page._grid_widget.connectToView(d)
+        self.task_tool_box_widget.workflow_page._grid_widget._setColor(qt.QWidget.green)
         self.task_tool_box_widget.workflow_page.\
             _grid_widget._shape_history = self.shape_history
         
@@ -73,17 +77,25 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
            self.shape_history.get_drawing_event_handler().\
                deletion_cb = self.shape_deleted
         
-           try:
-               self.shape_history.get_drawing_event_handler().\
-                   move_to_centred_position_cb = self.diffractometer_hwobj.\
-                                              moveToCentredPosition
-           except AttributeError:
-               logging.error('Could not get diffractometer_hwobj, check your configuration')
-               traceback.print_exc()
-        else:
-           logging.info("Ooooh. TaskToolBrick has no shape history")
+        try:
+            self.shape_history.get_drawing_event_handler().\
+                move_to_centred_position_cb = self.diffractometer_hwobj.\
+                                              moveToCentredPosition                            
+        except AttributeError:
+            logging.error('Could not get diffractometer_hwobj, check your configuration')
+            traceback.print_exc()
 
+        self.session_hwobj = self.beamline_setup_hwobj.session_hwobj
+        if self.session_hwobj.session_id:
+            self.setEnabled(True)
 
+    def user_group_saved(self, new_user_group):
+        self.session_hwobj.set_user_group(str(new_user_group))
+        self.task_tool_box_widget.update_data_path_model()
+        path = self.session_hwobj.get_base_image_directory() + "/" + str(new_user_group)
+        msg = 'Image path is: %s' % path
+        logging.getLogger('user_level_log').info(msg)
+        
     def set_session(self, session_id, t_prop_code = None, prop_number = None,
                     prop_id = None, start_date = None, prop_code = None, 
                     is_inhouse = None):
@@ -106,7 +118,11 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
         succesfully logged in.
         """
         self.ispyb_logged_in = logged_in
-        self.setDisabled(not logged_in)
+        
+        if self.session_hwobj is not None:
+            self.session_hwobj.set_user_group('')
+            
+        self.setEnabled(logged_in)
         self.task_tool_box_widget.ispyb_logged_in(logged_in)
         
     
@@ -132,7 +148,6 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
                 if self.queue_model_hwobj:
                     self.beamline_setup_hwobj.queue_model_hwobj = self.queue_model_hwobj
                     self.task_tool_box_widget.set_beamline_setup(self.beamline_setup_hwobj)
-                                    
             else:
                 logging.getLogger('user_level_log').error('Could not load beamline setup '+\
                                                           'check configuration !.')
