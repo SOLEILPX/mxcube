@@ -1,5 +1,5 @@
-<procedure class="SOLEILLdapLogin">
+<procedure class="LdapLogin">
   <ldaphost>195.221.10.1</ldaphost>
   <ldapport>389</ldapport>
-  <ldapdc>EXP</ldapdc>
+  <ldapdomain>EXP</ldapdomain>
 </procedure>

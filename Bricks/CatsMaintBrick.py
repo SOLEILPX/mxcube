@@ -12,7 +12,7 @@ from BlissFramework import BaseComponents
 from widgets.catsmaintwidget import CatsMaintWidget
 
 
-__category__ = 'SC'            
+__category__ = "SC"
 
     
 class CatsMaintBrick(BaseComponents.BlissWidget):

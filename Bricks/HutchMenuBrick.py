@@ -756,9 +756,10 @@ class HutchMenuBrick(BlissWidget):
                  pass
               try:
                 self.__beam.move(beam_x, beam_y)
-                #self.__rectangularBeam.move(beam_x, beam_y)
                 try:
-                  self.minidiff.getBeamInfo(self._updateBeam)
+                  get_beam_info = self.minidiff.getBeamInfo #getCommandObject("getBeamInfo")
+                  if force or get_beam_info: #.isSpecReady():
+                      self._updateBeam({"size_x":0.045, "size_y":0.025, "shape": "rectangular"})
                 except:
                   logging.getLogger().exception("Could not get beam size: cannot display beam")
                   self.__beam.hide()
@@ -798,7 +799,8 @@ class HutchMenuBrick(BlissWidget):
                     self.updateBeam(True)
                     #self._drawBeam()
                     self.__scale.show()
-
+            # self.updateBeam(True) / Forced update
+               
     # Slits changed: update beam size
     def slitsPositionChanged(self, *args):
         if self.minidiff is None or self.slitbox is None or self.minidiff.pixelsPerMmY is None or self.minidiff.pixelsPerMmZ is None:
