@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 
 import logging, time, math, numpy
 from MiniDiff import MiniDiff
 from gevent.event import AsyncResult
 import gevent
 import PyTango
-
+import os
 
 USER_CLICKED_EVENT = AsyncResult()
 
@@ -16,7 +17,7 @@ def manual_centring(phi, phiy, phiz, sampx, sampy, pixelsPerMmY, pixelsPerMmZ, b
   logging.info("=== MANUAL CENTRING STARTED")
   if all([x.isReady() for x in (phi, phiy, phiz, sampx, sampy)]):
     phiSavedPosition = phi.getPosition()
-    phiSavedDialPosition = 327.3 
+    phiSavedDialPosition = 0. #327.3 
     #phiSavedDialPosition = phi.getDialPosition()
     #logging.info("MiniDiff phi saved dial = %f " % phiSavedDialPosition)
   else:
@@ -41,7 +42,7 @@ def manual_centring(phi, phiy, phiz, sampx, sampy, pixelsPerMmY, pixelsPerMmZ, b
     b1 = -math.radians(phiSavedPosition - phiSavedDialPosition)
     rotMatrix = numpy.matrix([math.cos(b1), -math.sin(b1), math.sin(b1), math.cos(b1)])
     rotMatrix.shape = (2,2)
-    dx, dy = numpy.dot(numpy.array([x,y]), numpy.array(rotMatrix))/pixelsPerMmY 
+    dx, dy = numpy.dot(numpy.array([x,y]), numpy.array(rotMatrix))/pixelsPerMmZ
 
     beam_xc_real = beam_xc / float(pixelsPerMmY)
     beam_yc_real = beam_yc / float(pixelsPerMmZ)
@@ -76,11 +77,11 @@ class MiniDiffPX2(MiniDiff):
         self.collect_phaseposition = 4
 
     def init(self):
-        self.md2          = PyTango.DeviceProxy('i11-ma-cx1/ex/md2')
+        #self.md2          = PyTango.DeviceProxy('i11-ma-cx1/ex/md2')
         self.beamPosition = PyTango.DeviceProxy('i11-ma-cx1/ex/md2-beamposition')
         MiniDiff.init(self)
-
-    def getCalibrationData(self, offset):
+        
+    def getCalibrationData(self, offset=None):
         return 1000./self.md2.CoaxCamScaleX, 1000./self.md2.CoaxCamScaleY
 
     def getBeamPosX(self):
@@ -113,21 +114,46 @@ class MiniDiffPX2(MiniDiff):
         USER_CLICKED_EVENT.set((x,y))
 
 
-
+    def wait(self, device):
+        while device.state().name in ['MOVING', 'RUNNING']:
+            time.sleep(.1)
+    
     def setScanStartAngle(self, sangle):
         logging.info("MiniDiffPX2 / setting start angle to %s ", sangle )
-        if self.md2_ready:
-            self.md2.write_attribute("ScanStartAngle", sangle )
+        #if self.md2_ready:
 
-    def startScan(self,wait=True):
+        executed = False
+        while executed is False:
+            try:
+                self.wait(self.md2)
+                self.md2.write_attribute("ScanStartAngle", sangle )
+                executed = True
+            except Exception, e:
+                print e
+                logging.info('Problem writing ScanStartAngle command')
+                logging.info('Exception ' + str(e))
+
+    def startScan(self, wait=True):
         logging.info("MiniDiffPX2 / starting scan " )
-
         if self.md2_ready:
             diffstate = self.getState()
             logging.info("SOLEILCollect - diffractometer scan started  (state: %s)" % diffstate)
-            self.md2.StartScan()
-
-       # self.getCommandObject("start_scan")() - if we define start_scan command in *xml
+            
+        executed = False
+        while executed is False:
+            try:
+                self.wait(self.md2)
+                self.md2.command_inout('StartScan')
+                self.wait(self.md2)
+                executed = True
+                logging.info('Successfully executing StartScan command')
+            except Exception, e:
+                print e
+                os.system('echo $(date) error executing StartScan command >> /927bis/ccd/collectErrors.log')
+                logging.info('Problem executing StartScan command')
+                logging.info('Exception ' + str(e))
+        return
+        # self.getCommandObject("start_scan")() - if we define start_scan command in *xml
 
     def goniometerReady(self, oscrange, npass, exptime):
        logging.info("MiniDiffPX2 / programming gonio oscrange=%s npass=%s exptime=%s" % (oscrange,npass, exptime) )
@@ -144,7 +170,7 @@ class MiniDiffPX2(MiniDiff):
           self.md2.write_attribute('PhasePosition', self.collect_phaseposition)
     
     def getBeamSize(self):
-        return (10,5)
+        return (10, 5)
 
     def getBeamInfo(self, callback=None, error_callback=None):
         logging.info(" I am getBeamInfo in MiniDiffPX2.py ")
