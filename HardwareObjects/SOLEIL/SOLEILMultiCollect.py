@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from HardwareRepository.BaseHardwareObjects import HardwareObject
 from AbstractMultiCollect import *
 from gevent.event import AsyncResult
@@ -31,13 +32,24 @@ class TunableEnergy:
     def set_wavelength(self, wavelength):
         logging.info("<SOLEIL MultiCollect TUNABLE ENERGY> VERIFY - set wavelength")
         energy_obj = self.bl_control.energy
-        return energy_obj.startMoveWavelength(wavelength)
+        try:
+            energy_obj.startMoveWavelength(wavelength)
+        except:
+            import traceback
+            logging.info("<SOLEIL MultiCollect TUNABLE ENERGY> exception %s" % traceback.print_exc())
+            print traceback.print_exc()
+        while energy_obj.getState() != 'STANDBY':
+            time.sleep(0.5)
 
     @task
     def set_energy(self, energy):
         logging.info("<SOLEIL MultiCollect TUNABLE ENERGY> VERIFY - set energy")
+        logging.info("self.bl_control.energy %s" % self.bl_control.energy)
         energy_obj = self.bl_control.energy
-        return energy_obj.startMoveEnergy(energy)
+        energy_obj.startMoveEnergy(energy)
+        logging.info("energy_obj.getState() %s " % energy_obj.getState())
+        while energy_obj.getState() != 'STANDBY':
+            time.sleep(0.5)
 
     def getCurrentEnergy(self):
         logging.info("<SOLEIL MultiCollect TUNABLE ENERGY> VERIFY - get current energy")
@@ -190,7 +202,6 @@ class LimaAdscDetector:
         return
 
     def lastImage(self, integer=1, imagePath='/927bis/ccd/test/', fileName='test.img'):
-
         line = str(integer) + ' ' + os.path.join(imagePath, fileName)
         f = open( self.xformstatusfile, 'w')
         f.write(line)
@@ -441,12 +452,19 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
 
     @task
     def set_resolution(self, new_resolution):
-        return self.bl_control.resolution.move(new_resolution)
+        logging.info("<SOLEIL MultiCollect> set resolution to %s" % new_resolution)
+        self.bl_control.resolution.move(new_resolution)
+        logging.info("<SOLEIL MultiCollect set resolution> motor stateValue is %s" % self.bl_control.resolution.motorIsMoving())
+        while self.bl_control.resolution.motorIsMoving():
+            logging.info("<SOLEIL MultiCollect set resolution> motor stateValue is %s" % self.bl_control.resolution.motorIsMoving())
+            time.sleep(0.5)
 
     @task
     def move_detector(self, detector_distance):
-        logging.info("<SOLEIL MultiCollect> TODO - move detector to %s" % detector_distance)
-        return
+        logging.info("<SOLEIL MultiCollect> move detector to %s" % detector_distance)
+        self.bl_control.detector_distance.move(detector_distance)
+        while self.bl_control.detector_distance.motorIsMoving():
+            time.sleep(0.5)
 
 
     @task
@@ -600,12 +618,12 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
         return 
 
     def get_wavelength(self):
-        logging.info("<SOLEIL MultiCollect> TODO - get wavelength " )
+        logging.info("<SOLEIL MultiCollect> get wavelength " )
         return self._tunable_bl.get_wavelength()
 
     def get_detector_distance(self):
-        logging.info("<SOLEIL MultiCollect> TODO - get detector distance " )
-        return
+        logging.info("<SOLEIL MultiCollect> get detector distance " )
+        return self.bl_control.detector_distance.getPosition()
        
     def get_resolution(self):
         return self.bl_control.resolution.getPosition()
@@ -639,10 +657,15 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
 
     def get_beam_size(self):
         logging.info("<SOLEIL MultiCollect> TODO - get beam size " )
-        return (None,None)
-        return (self.execute_command("get_beam_size_x"), self.execute_command("get_beam_size_y"))
+        return (0.010, 0.005)
+        #return (self.execute_command("get_beam_size_x"), self.execute_command("get_beam_size_y"))
 
-
+    def get_horizontal_beam_size(self):
+        return self.get_beam_size()[0]
+    
+    def get_vertical_beam_size(self):
+        return self.get_beam_size()[-1]
+        
     def get_slit_gaps(self):
         logging.info("<SOLEIL MultiCollect> TODO - get slit gaps" )
         return
@@ -651,8 +674,8 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
 
     def get_beam_shape(self):
         logging.info("<SOLEIL MultiCollect> TODO - get beam shape" )
-        return
-        return self.execute_command("get_beam_shape")
+        return "ellipse"
+        #return self.execute_command("get_beam_shape")
     
     def get_measured_intensity(self):
       logging.info("<SOLEIL MultiCollect> TODO - get measured intensity " )
@@ -670,11 +693,9 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
 
     def isConnected(self):
         return True
-
       
     def isReady(self):
         return True
- 
     
     def sampleChangerHO(self):
         return self.bl_control.sample_changer
@@ -751,23 +772,19 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
           return None
         else:
           if 'inhouse' in directory:
-            archive_dir = os.path.join('/data/pyarch/', dir_path_list[2], suffix_path)
+            archive_dir = os.path.join('/927bis/ccd/pyarch/', dir_path_list[2], suffix_path)
           else:
-            archive_dir = os.path.join('/data/pyarch/', dir_path_list[4], dir_path_list[3], *dir_path_list[5:])
+            archive_dir = os.path.join('/927bis/ccd/pyarch/', dir_path_list[4], dir_path_list[3], *dir_path_list[5:])
           if archive_dir[-1] != os.path.sep:
             archive_dir += os.path.sep
             
           return archive_dir
 
     def prepare_input_files(self, files_directory, prefix, run_number, process_directory):
-        return "/tnp", "/tmp"
+        return "/tmp", "/tmp"
         
     def write_input_files(self, collection_id):
         pass
-
-
-    def set_helical(self, onmode,  positions=None):
-        logging.info("<SOLEIL MultiCollect> TODO - set helical")
 
     def get_cryo_temperature(self):
         logging.info("<SOLEIL MultiCollect> TODO - get cryo temperature")
@@ -776,9 +793,11 @@ class SOLEILMultiCollect(AbstractMultiCollect, HardwareObject):
     def get_machine_current(self):
         logging.info("<SOLEIL MultiCollect> TODO - get machine current")
         pass
+    
     def get_machine_fill_mode(self):
         logging.info("<SOLEIL MultiCollect> TODO - get fill mode")
         pass
+    
     def get_machine_message(self):
         logging.info("<SOLEIL MultiCollect> TODO - get machine message")
         pass
