@@ -111,6 +111,9 @@ class BLEnergy (Device) :
     def canMoveEnergy(self):
         logging.getLogger("HWR").debug("%s: BLEnergy.canMoveEnergy", self.name())
         return  True
+       
+    def getPosition(self):
+        return self.getCurrentEnergy()
         
     def getCurrentEnergy(self):
         if self.deviceOk :           
@@ -118,6 +121,9 @@ class BLEnergy (Device) :
         else : 
             return None
     
+    def getState(self):
+        return self.BLEnergydevice.State().name
+        
     def getEnergyComputedFromCurrentGap(self):
         #logging.getLogger("HWR").debug("%s: BLEnergy.getCurrentEnergy", self.name())
         if self.deviceOk:
