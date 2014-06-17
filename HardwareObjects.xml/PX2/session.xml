@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<object class = "Session" role = "session">  
+<object class = "SOLEILSession" role = "session">  
   <object href="/mxlocal" role="config"/>
     
   <inhouse_users>
