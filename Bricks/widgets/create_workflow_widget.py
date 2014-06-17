@@ -35,11 +35,11 @@ class CreateWorkflowWidget(CreateTaskBase):
         self._data_path_widget.data_path_widget_layout.child('file_name_label').setText('')
         self._data_path_widget.data_path_widget_layout.child('file_name_value_label').hide()
 
-        self._grid_widget = MxLookupScanBrick.MxLookupScanBrick(self, 'grid_widget')
+        #self._grid_widget = MxLookupScanBrick.MxLookupScanBrick(self, 'grid_widget')
 
         v_layout.addWidget(self._workflow_type_gbox)
         v_layout.addWidget(self._data_path_gbox)
-        v_layout.addWidget(self._grid_widget)
+        #v_layout.addWidget(self._grid_widget)
         v_layout.addStretch()
 
         self.connect(self._data_path_widget.data_path_widget_layout.child('prefix_ledit'), 
@@ -66,15 +66,16 @@ class CreateWorkflowWidget(CreateTaskBase):
 
 
     def set_shape_history(self, shape_history_hwobj):
-        self._grid_widget._shape_history = shape_history_hwobj
+        pass
+        #self._grid_widget._shape_history = shape_history_hwobj
 
-        motor =  self._beamline_setup_hwobj.\
-                getObjectByRole('horizontal_motors')
-        self._grid_widget.initialize_motors('horizontal', motor)
+        #motor =  self._beamline_setup_hwobj.\
+        #        getObjectByRole('horizontal_motors')
+        #self._grid_widget.initialize_motors('horizontal', motor)
 
-        motor = self._beamline_setup_hwobj.\
-                getObjectByRole('vertical_motors')
-        self._grid_widget.initialize_motors('vertical', motor)
+        #motor = self._beamline_setup_hwobj.\
+        #        getObjectByRole('vertical_motors')
+        #self._grid_widget.initialize_motors('vertical', motor)
 
     def init_models(self):
         CreateTaskBase.init_models(self)
@@ -136,6 +137,7 @@ class CreateWorkflowWidget(CreateTaskBase):
         beamline_params['run_number'] = wf.path_template.run_number
         beamline_params['collection_software'] = 'mxCuBE - 2.0'
         beamline_params['sample_node_id'] = sample._node_id
+        beamline_params['sample_lims_id'] = sample.lims_id
 
         params_list = map(str, list(itertools.chain(*beamline_params.iteritems())))
         params_list.insert(0, self.workflows[wf_name]['path'])

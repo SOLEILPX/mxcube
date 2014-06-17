@@ -1,3 +1,4 @@
+import re
 from BlissFramework.BaseComponents import BlissWidget
 from BlissFramework import Icons
 from qt import *
@@ -139,7 +140,10 @@ class ProposalBrick2(BlissWidget):
     def save_group(self):
         user_group = str(self.user_group_ledit.text())
 
-        if user_group.isalnum() or user_group == "":
+        pattern = r"^[a-zA-Z0-9_-]*$"
+        valid = re.match(pattern, user_group, flags = 0).group() == user_group
+        
+        if valid:
             self.saved_group = True
             self.user_group_ledit.setPaletteBackgroundColor(widget_colors.LIGHT_GREEN)
             msg = 'User group set to: %s' % str(self.user_group_ledit.text())
@@ -225,7 +229,10 @@ class ProposalBrick2(BlissWidget):
         self.user_group_label.hide()
         self.user_group_ledit.hide()
         self.user_group_save_button.hide()
-        
+       
+	#resets active proposal
+	self.resetProposal()
+ 
         #self.proposalLabel.setText(ProposalBrick2.NOBODY_STR)
         #QToolTip.add(self.proposalLabel,"")
        
@@ -233,6 +240,12 @@ class ProposalBrick2(BlissWidget):
         self.emit(PYSIGNAL("setWindowTitle"),(self["titlePrefix"],))
         self.emit(PYSIGNAL("sessionSelected"),(None, ))
         self.emit(PYSIGNAL("loggedIn"), (False, ))
+
+    def resetProposal(self):
+        self.session_hwobj.proposal_code = None
+        self.session_hwobj.session_id = None
+        self.session_hwobj.proposal_id = None
+        self.session_hwobj.proposal_number = None 	
 
     # Sets the current session; changes from login mode to logout mode
     def setProposal(self,proposal,person,laboratory,session,localcontact):
@@ -479,9 +492,9 @@ class ProposalBrick2(BlissWidget):
             
             return self.acceptLogin(prop_dict,pers_dict,lab_dict,ses_dict,cont_dict)
 
-        if self.ldapConnection is None:
+        if self.ldapConnection == None:
             return self.refuseLogin(False,'Not connected to LDAP, unable to verify password.')
-        if self.dbConnection is None:
+        if self.dbConnection == None:
             return self.refuseLogin(False,'Not connected to the ISPyB database, unable to get proposal.')
 
         self._do_login(prop_type,prop_number,prop_password, self.dbConnection.beamline_name)
