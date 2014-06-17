@@ -21,7 +21,7 @@ class xanes(object):
                  prefix='x5',
                  session_id=None,
                  blsample_id=None,
-                 nbSteps=40,
+                 nbSteps=95,
                  roiwidth=0.30,
                  beforeEdge=0.030,
                  afterEdge=0.050,
@@ -133,7 +133,7 @@ class xanes(object):
             
         self.moveBeamlineEnergy(self.e_edge)
         
-        #self.optimizeTransmission()
+        self.optimizeTransmission()
         
         self.insertFluoDet()
         
@@ -489,7 +489,7 @@ class xanes(object):
                                             'diode5': self.diode5.intensity,
                                             'cvd': self.cvd.intensity}
         #logging.info('self.results[\'observations\'][en] %s' % self.results['observations'][en])
-        self.results['observations'][en]['point'] = self.results['observations'][en]['roiCounts'] / self.results['observations'][en]['diode5']
+        self.results['observations'][en]['point'] = self.results['observations'][en]['roiCounts'] / -self.results['observations'][en]['diode5']
             
     def updateRunningScan(self, en):
         self.runningScan['ens'].append(float(en))
