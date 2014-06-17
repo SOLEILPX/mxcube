@@ -41,7 +41,8 @@ class TangoResolutionComplex(BaseHardwareObjects.Equipment):
          "STANDBY": 2,
          "RUNNING": 4,
          "MOVING":  4,
-         "2":       2}
+         "2":       2,
+         "1":       1}
    
     
     def _init(self):
@@ -244,7 +245,9 @@ class TangoResolutionComplex(BaseHardwareObjects.Equipment):
     def newDistance(self, dist):
         self.device.position = dist
 
-
+    def motorIsMoving(self):
+        return self.device.state().name in ['MOVING', 'RUNNING']
+        
     def stop(self):
         try:
             self.device.Stop()
