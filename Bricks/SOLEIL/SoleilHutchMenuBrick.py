@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from qt import *
 import logging
@@ -71,4 +72,7 @@ class SoleilHutchMenuBrick(HutchMenuBrick.HutchMenuBrick):
 
     def beamPositionCheck(self):
         self.minidiff.beamPositionCheck()
+        
+    def apertureAlign(self):
+        self.minidiff.apertureAlign()
         
