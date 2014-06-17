@@ -5,6 +5,11 @@
   <command type="tango" name="_cmdReset">reset</command>
   <command type="tango" name="_cmdBack">back</command>
   <command type="tango" name="_cmdSafe">safe</command>
+  
+  <command type="tango" name="_cmdHome">home</command>
+  <command type="tango" name="_cmdDry">dry</command>
+  <command type="tango" name="_cmdSoak">soak</command>
+  
   <command type="tango" name="_cmdPowerOn">powerOn</command>
   <command type="tango" name="_cmdPowerOff">powerOff</command>
 

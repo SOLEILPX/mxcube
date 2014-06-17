@@ -1,4 +1,4 @@
-<equipment class = "CatsPX1">
+<equipment class = "CatsPX2">
   <username>Cats</username>
   <tangoname>test/cats/robot</tangoname>    
   <!-- specify the number of lids here to support different models-->
@@ -21,9 +21,9 @@
 
   <channel type="tango" name="_chnTotalLidState" polling="events">di_AllLidsClosed</channel>
 
-  <command type="tango" name="_cmdLoad">put_bcrd</command>
+  <command type="tango" name="_cmdLoad">put</command>
   <command type="tango" name="_cmdUnload">get</command>
-  <command type="tango" name="_cmdChainedLoad">getput_bcrd</command>
+  <command type="tango" name="_cmdChainedLoad">getput</command>
   <channel type="tango" name="_chnNumLoadedSample" polling="events">NumSampleOnDiff</channel>
   <channel type="tango" name="_chnLidLoadedSample" polling="events">LidSampleOnDiff</channel>
   <command type="tango" name="_cmdScanSample">barcode</command>
