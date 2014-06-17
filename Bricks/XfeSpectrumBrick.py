@@ -130,7 +130,8 @@ class XfeSpectrumBrick(BlissWidget):
         self.parametersBox.setInsideMargin(4)
         self.parametersBox.setInsideSpacing(2)
         self.parametersBox.setCheckable(True)
-        self.parametersBox.setChecked(False)
+#        self.parametersBox.setChecked(False)
+        self.parametersBox.setChecked(True)
         QObject.connect(self.parametersBox, SIGNAL("toggled(bool)"), self.parametersBoxToggled)
 
         QLabel("Count time (in seconds) :", self.parametersBox)

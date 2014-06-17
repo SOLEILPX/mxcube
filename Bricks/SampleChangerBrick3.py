@@ -15,7 +15,7 @@ class VialView(QWidget):
         QWidget.__init__(self,*args)
         self.vialIndex=vial_index
         self.setFixedSize(20,16)
-        self.pixmapUnknown=Icons.load("sample_unknown")
+        self.pixmapUnknown=Icons.load("sample_unknown.png")
         self.pixmapNoBarcode=Icons.load("sample_nobarcode.png")
         self.pixmapBarcode=Icons.load("sample_barcode.png")
         self.pixmapAxis=Icons.load("sample_axis.png")
@@ -88,7 +88,7 @@ class SampleBox(QVBox):
 
 
 class SamplesView(QWidget):
-    SAMPLE_COUNT = 10
+    SAMPLE_COUNT = 16
     CURRENT_VIAL_COLOR=QWidget.gray
 
     def __init__(self,parent,basket_index):
@@ -336,7 +336,7 @@ class CurrentSampleView(CurrentView):
 
         self.positionLabel=QLabel("Position:",self.commandsBox)
         self.commandsBox.layout().addWidget(self.positionLabel, 0, 0)
-        self.selected=QSpinBox(1,10,1,self.commandsBox)
+        self.selected=QSpinBox(1,16,1,self.commandsBox)
         self.selected.setWrapping(True)
         self.commandsBox.layout().addWidget(self.selected,0,1)
         self.selected.editor().setAlignment(QWidget.AlignRight)
@@ -973,7 +973,7 @@ class SampleChangerBrick3(BlissWidget):
         
         presences = []
         for basket in baskets:
-            presences.append([[VialView.VIAL_UNKNOWN]]*10 if basket.isPresent() else [[VialView.VIAL_NONE]]*10)
+            presences.append([[VialView.VIAL_UNKNOWN]]*16 if basket.isPresent() else [[VialView.VIAL_NONE]]*16)
      
         for sample in self.sampleChanger.getSampleList():
             matrix = sample.getID() or ""
@@ -1003,7 +1003,7 @@ class SampleChangerBrick3(BlissWidget):
             self.sampleChanger.resetBasketsInformation()
 
             for basket, samples in self.basketsSamplesSelectionDialog.result.iteritems():
-                for i in range(10):
+                for i in range(16):
                     input=[basket, i+1, 0, 0, 0]
                 
                 for sample in samples:
@@ -1051,7 +1051,7 @@ class BasketsSamplesSelection(QDialog):
             self.samplesBoxes.append(QHBox(samples_group, 'sample_group'))
             QLabel("Basket %s :" % str(i+1), self.samplesBoxes[-1])
             self.txtPresentSamples.append(QLineEdit(self.samplesBoxes[-1]))
-            self.txtPresentSamples[-1].setText("1-10")
+            self.txtPresentSamples[-1].setText("1-16")
             self.samplesBoxes[-1].show()
         
         QObject.connect(self.txtPresentBaskets, SIGNAL("textChanged(const QString&)"), self.presentBasketsChanged)

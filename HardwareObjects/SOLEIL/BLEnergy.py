@@ -50,7 +50,7 @@ class BLEnergy (Device) :
             
         # parameters for polling     
         if self.deviceOk :
-            self.sConnected()
+            self.isConnected()
             self.prev_state = str( self.BLEnergydevice.State() )
             energyChan = self.getChannelObject("energy") 
             energyChan.connectSignal("update", self.energyChanged)

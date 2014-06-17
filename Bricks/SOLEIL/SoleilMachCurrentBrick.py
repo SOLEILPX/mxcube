@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+
 """
-MachCurrentBrick
+
+MachCurrentBrick / Soleil
 
 [Description]
 

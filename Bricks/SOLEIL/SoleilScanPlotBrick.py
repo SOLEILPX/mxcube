@@ -1,48 +1,43 @@
 """Spec scan plot brick"""
 
-__author__ = 'Matias Guijarro, Martin Savko'
-__version__ = '1.1'
-__category__ = 'SOLEIL'
+__author__ = 'Matias Guijarro'
+__version__ = '1.0'
+__category__ = 'Scans'
 
 import logging
 
 from qt import *
 from PyMca.QtBlissGraph import QtBlissGraph
 from BlissFramework.BaseComponents import BlissWidget
-try:
-  from SpecClient_gevent import SpecScan
-except ImportError:
-  from SpecClient import SpecScan
+#from SpecClient import SpecScan
 
+__category__ = 'Scans'
 
-__category__ = 'SOLEIL'
-
-class QSpecScan(QObject, SpecScan.SpecScanA):
-    def __init__(self, specVersion):
-        QObject.__init__(self)
-        SpecScan.SpecScanA.__init__(self, specVersion)
+#class QSpecScan(QObject, SpecScan.SpecScanA):
+#    def __init__(self, specVersion):
+#        QObject.__init__(self)
+#        SpecScan.SpecScanA.__init__(self, specVersion)
     
 
-    def newScan(self, scanParameters):
-        self.emit(PYSIGNAL('newScan'), (scanParameters, ))
+#    def newScan(self, scanParameters):
+#        self.emit(PYSIGNAL('newScan'), (scanParameters, ))
 
 
-    def newScanPoint(self, i, x, y):
-        self.emit(PYSIGNAL('newPoint'), (x, y, ))
-
+#    def newScanPoint(self, i, x, y):
+#        self.emit(PYSIGNAL('newPoint'), (x, y, ))
 
 class SoleilScanPlotBrick(BlissWidget):
     def __init__(self, *args):
         BlissWidget.__init__(self, *args)
 
-        self.defineSignal('newScan', ())
-        
-        self.defineSlot('newScanPoint',())
-        
+#        self.defineSignal('newScan', ())
+        self.defineSlot('newScan', ())
+	
+	self.defineSlot('newScanPoint',())
+
         self.scanObject = None
         self.xdata = []
-        self.ylable = ""
-        self.mylog = 0
+        self.ydata = []
 
         self.isConnected = None
         #self.canAddPoint = None
@@ -95,8 +90,8 @@ class SoleilScanPlotBrick(BlissWidget):
             if self.scanObject is not None:
                 self.safeDisconnect()
                 
-            self.scanObject = QSpecScan(newValue)
-
+#            self.scanObject = QSpecScan(newValue)
+            self.scanObject = None
             if self.scanObject is not None:
                 self.safeConnect()
 
@@ -118,49 +113,23 @@ class SoleilScanPlotBrick(BlissWidget):
 
     def newScan(self, scanParameters):
         #self.canAddPoint = True
-        self.emit(PYSIGNAL('newScan'), ())
+        #self.emit(PYSIGNAL('newScan'), ())
         self.lblTitle.setText('<nobr><b>%s</b></nobr>' % scanParameters['title'])
-        self.xdata = []
-
-        self.graph.clearcurves()
         self.graph.xlabel(scanParameters['xlabel'])
-        self.ylabel = scanParameters['ylabel']
+        self.graph.ylabel(scanParameters['ylabel'])
+#        if self.scanObject.getScanType() == SpecScan.TIMESCAN:
+#            self.graph.setx1timescale(True)
+#        else:
+#            self.graph.setx1timescale(False)
+        self.graph.setx1timescale(False)
+        self.xdata = []
+        self.ydata = []
+        self.graph.newcurve('scan', self.xdata, self.ydata)
+        self.graph.replot() 
 
-        ylabels = self.ylabel.split()
-        self.ydatas = [[] for x in range(len(ylabels))]
-        for labels,ydata in zip(ylabels,self.ydatas):
-            self.graph.newcurve(labels,self.xdata,ydata)
-            
-        
-        self.graph.ylabel(self.ylabel)
-        if self.scanObject.getScanType() == SpecScan.TIMESCAN:
-            self.graph.setx1timescale(True)
-        else:
-            self.graph.setx1timescale(False)
-        
-        try:
-            scanParameters['scaletype'] == 'log'
-            if self.mylog == 0 :
-                self.graph.toggleLogY()
-                self.mylog = 1
-        except:
-            if self.mylog == 1:
-              self.graph.toggleLogY()
-              self.mylog = 0
-
-        self.graph.replot()
-        
-    #def newScanPoint(self, x, y):
-        #self.xdata.append(x)
-        #for label,ydata,yvalue in zip(self.ylabel.split(),self.ydatas,str(y).split()):
-            #ydata.append(float(yvalue))
-            #self.graph.newcurve(label,self.xdata,ydata)
-        #self.graph.replot()
-        
     def newScanPoint(self, x, y):
         #if not self.canAddPoint:
         #    return
-        print 'SoleilScanPlotBric:newScanPoint', (x, y)
         self.xdata.append(x)
         self.ydata.append(y)
         self.graph.newcurve('scan', self.xdata, self.ydata)

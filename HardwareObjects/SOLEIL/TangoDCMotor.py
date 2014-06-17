@@ -184,6 +184,7 @@ class TangoDCMotor(Device):
         Arguments:
         absolutePosition -- position to move to
         """
+        logging.getLogger("TangoClient").info("TangoDCMotor move. Trying to go to %s: type '%s'", absolutePosition, type(absolutePosition))
         if type(absolutePosition) != float and type(absolutePosition) != int:
             logging.getLogger("TangoClient").error("Cannot move %s: position '%s' is not a number. It is a %s", self.tangoname, absolutePosition, type(absolutePosition))
         logging.info("TangoDCMotor: move. motor will go to %s " % str(absolutePosition))   
@@ -196,7 +197,7 @@ class TangoDCMotor(Device):
         logging.getLogger("HWR").info("TangoDCMotor.stop")
         stopcmd = self.getCommandObject("Stop")()
         if not stopcmd:
-           stopcmd = TangoCommand("stopcmd", "Stop", self.tangoname)
+           stopcmd = TangoCommand("stopcmd","Stop",self.tangoname)
         stopcmd()
 
     def isSpecConnected(self):

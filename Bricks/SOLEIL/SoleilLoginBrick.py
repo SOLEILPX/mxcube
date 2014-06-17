@@ -6,7 +6,7 @@ import time
 import os
 from BlissFramework.Utils import widget_colors
 
-__category__ = "SOLEIL"
+__category__ = 'mxCuBE'
 
 PROPOSAL_GUI_EVENT = QEvent.User
 class ProposalGUIEvent(QCustomEvent):
@@ -50,7 +50,6 @@ class SoleilLoginBrick(BlissWidget):
         self.addProperty('codes','string','fx ifx ih im ix ls mx opid')
         self.addProperty('icons','string','')
         self.addProperty('serverStartDelay','integer',500)
-        self.addProperty('loginAlways','boolean',True)
         self.addProperty('dbConnection','string')
         self.addProperty('session', 'string', '/session')
 
@@ -222,7 +221,7 @@ class SoleilLoginBrick(BlissWidget):
     def logout(self):
         # Reset brick info
         #self.propNumber.setText("")
-        self.userName.setText("")
+        self.username.setText("")
         self.proposal=None
         self.session=None
         #self.sessionId=None
@@ -246,11 +245,7 @@ class SoleilLoginBrick(BlissWidget):
 
     # Sets the current session; changes from login mode to logout mode
     def setProposal(self,proposal,person,laboratory,session,localcontact):
-
-        logging.debug("setting proposal")
         self.dbConnection.enable()
-        logging.debug("   - db enabled ")
-
         self.session_hwobj.proposal_code = proposal['code']
         self.session_hwobj.session_id = session['sessionId']
         self.session_hwobj.proposal_id = proposal['proposalId']
@@ -301,7 +296,6 @@ class SoleilLoginBrick(BlissWidget):
 
             # Set interface info and signal the new session
             proposal_text = "%s-%s" % (proposal['code'],proposal['number'])
-            logging.debug("   - setting title label to  %s" % proposal_text )
             self.titleLabel.setText("<nobr>   User: <b>%s</b>" % proposal_text)
             tooltip = "\n".join([proposal_text, header, title]) 
             if comments:
@@ -377,15 +371,7 @@ class SoleilLoginBrick(BlissWidget):
         else: 
           self.emit(PYSIGNAL("setWindowTitle"),(self["titlePrefix"],))
           self.emit(PYSIGNAL("sessionSelected"),(None, ))
-          #self.emit(PYSIGNAL("loggedIn"), (False, ))
-          self.emit(PYSIGNAL("loggedIn"), (True, ))
-          self.emit(PYSIGNAL("sessionSelected"), (self.session_hwobj.session_id,
-                                                  str(os.environ["USER"]),
-                                                  0,
-                                                  '',
-                                                  '',
-                                                  self.session_hwobj.session_id, 
-                                                  False))
+          self.emit(PYSIGNAL("loggedIn"), (False, ))
 
         start_server_event=ProposalGUIEvent(self.startServers,())
         qApp.postEvent(self,start_server_event)
@@ -552,7 +538,6 @@ class SoleilLoginBrick(BlissWidget):
             BlissWidget.propertyChanged(self,propertyName,oldValue,newValue)
 
     def _do_login(self, username,proposal_password,beamline_name, impersonate=False):
-        proposal_number = 999
         if not impersonate:
             #login_name=self.dbConnection.translate(proposal_code,'ldap')+str(proposal_number)
             login_name=username
@@ -563,11 +548,11 @@ class SoleilLoginBrick(BlissWidget):
                 self.refuseLogin(None,msg)
                 return
 
-            logging.getLogger().debug("ProposalBrick: password for %s-%s validated" % (username,proposal_number))
+            logging.getLogger().debug("ProposalBrick: password for %s-%s validated" % (proposal_code,proposal_number))
 
         # Get proposal and sessions
         logging.getLogger().debug('ProposalBrick: querying ISPyB database...')
-        prop=self.dbConnection.getProposal(username,proposal_number)
+        prop=self.dbConnection.getProposal(proposal_code,proposal_number)
 
         # Check if everything went ok
         prop_ok=True
