@@ -411,11 +411,12 @@ class HutchMenuBrick(BlissWidget):
           self.insideDataCollection = False
           self.emit(PYSIGNAL("centringAccepted"), (state,centring_status))
 
-	beam_info = self.beamInfo.get_beam_info()	
-	if beam_info is not None:
-	    beam_info['size_x'] = beam_info['size_x'] * self.pixels_per_mm[0]
-	    beam_info['size_y'] = beam_info['size_y'] * self.pixels_per_mm[1]
-        self.emit(PYSIGNAL("newCentredPos"), (state, centring_status, beam_info))
+        if self.beamInfo is not None:
+	   beam_info = self.beamInfo.get_beam_info()	
+	   if beam_info is not None:
+	       beam_info['size_x'] = beam_info['size_x'] * self.pixels_per_mm[0]
+	       beam_info['size_y'] = beam_info['size_y'] * self.pixels_per_mm[1]
+           self.emit(PYSIGNAL("newCentredPos"), (state, centring_status, beam_info))
 
         if self.queue_hwobj.is_executing():
             self.setEnabled(False)
@@ -611,7 +612,7 @@ class HutchMenuBrick(BlissWidget):
     def connectNotify(self, signalName):
         print "..... HutchMenuBrick:connectNotify  ", signalName
         if signalName=='beamPositionChanged':
-            if self.minidiff and self.minidiff.isReady():
+            if self.minidiff and self.minidiff.isReady() and self.beamInfo is not None:
 		self.beam_position = self.beamInfo.get_beam_position()
 		self.pixels_per_mm = self.minidiff.get_pixels_per_mm()
                 self.emit(PYSIGNAL("beamPositionChanged"), (self.beam_position[0],\
@@ -630,7 +631,8 @@ class HutchMenuBrick(BlissWidget):
     def miniDiffReady(self):
         try:
 	    self.pixels_per_mm = self.minidiff.get_pixels_per_mm()
-	    self.beam_position = self.beamInfo.get_beam_position()	
+            if self.beamInfo is not None:
+	        self.beam_position = self.beamInfo.get_beam_position()	
         except:
             self.pixels_per_mm = [None, None] 
         if self.pixels_per_mm[0] is not None\

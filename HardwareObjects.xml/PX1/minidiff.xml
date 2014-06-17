@@ -59,4 +59,5 @@
         </sample>
     </motors>
     <wagolight>/light</wagolight>
+    <samplechanger>/sc-mockup</samplechanger>
 </equipment>

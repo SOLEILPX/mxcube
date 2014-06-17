@@ -12,3 +12,5 @@ mxcube.gui
 *.bak
 *.new
 *.bck1
+,out*
+*backup*
