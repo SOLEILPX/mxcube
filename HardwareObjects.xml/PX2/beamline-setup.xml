@@ -7,6 +7,10 @@
   <object href="/minidiff"      role="diffractometer"/>
   <object href="/cats"          role="sample_changer"/>    
   <object href="/resolution"    role="resolution"/>
+  <object href="/horizontal"    role="horizontal"/>
+  <object href="/vertical"    role="vertical"/>
+  <object href="/horizontal_motors" role="horizontal_motors"/>
+  <object href="/vertical_motors" role="vertical_motors"/>
 
   <!-- Software (abstract) concepts -->
   <object href="/shape-history"      role="shape_history"/>
@@ -19,7 +23,7 @@
   <!--<object href="/workflow-mockup" role="workflow"/> -->
  
   <!-- Procedures and routines -->
-  <object href="/energyscan" role="energy"/>
+  <object href="/soleil-energyscan" role="energy"/>
   <!-- object href="/collect-mockup" role="collect"/ --> 
 
   <!-- Is it possible to change the beam wavelentgh.
@@ -32,8 +36,8 @@
 
   <!-- Should be moved to a detector object in the future -->
   <detector>
-    <manufacturer>DECTRIS</manufacturer>
-    <type>ADSC</type>
+    <manufacturer>ADSC</manufacturer>
+    <type>CCD</type>
     <model>Quantum315</model>
     <px>0.102592</px>
     <py>0.102592</py>
