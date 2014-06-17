@@ -822,6 +822,8 @@ class EnergyScanThread(QThread):
    
     def optimizeTransmission(self):
         import XfeCollect
+        logging.info('EnergyScanPX2 optimizeTransmission')
+        logging.getLogger("HWR").debug('EnergyScanPX2 optimizeTransmission') 
         self.xfe = XfeCollect.XfeCollect(directory='/tmp/opt_test')
         self.xfe.optimizeTransmission(self.parent.element, self.parent.edge)
 
