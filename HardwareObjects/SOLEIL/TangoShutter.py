@@ -44,7 +44,8 @@ class TangoShutter(BaseHardwareObjects.Device):
         'DISABLE':  'DISABLED',
         'OFF':      'FAULT',
         'STANDBY':  'STANDBY',
-        'ON':       'UNKNOWN'
+        'ON':       'UNKNOWN',
+        'ALARM':    'ALARM' 
         }
     #shutterState = {
             #None: 'unknown',
