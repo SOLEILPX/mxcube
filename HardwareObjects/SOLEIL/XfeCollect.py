@@ -29,16 +29,16 @@ class XfeCollect(object):
         self.filename = os.path.join(self.directory, self.prefix + '_fxe.png') #filename
         
         self.md2     = PyTango.DeviceProxy('i11-ma-cx1/ex/md2')
-        self.ketek   = PyTango.DeviceProxy('i11-ma-cx1/dt/dtc-mca_xmap.1')
+        self.fluodet   = PyTango.DeviceProxy('i11-ma-cx1/dt/dtc-mca_xmap.1')
         #self.counter = PyTango.DeviceProxy('i11-ma-c00/ca/cpt.2')
         self.obx     = PyTango.DeviceProxy('i11-ma-c04/ex/obx.1')
         self.ble     = PyTango.DeviceProxy('i11-ma-c00/ex/beamlineenergy')
         self.monodevice = PyTango.DeviceProxy('i11-ma-c03/op/mono1')
         self.optimize = None
         self.test = False
-        self.ketek.presettype = 1
-        self.ketek.peakingtime = 2.5
-        self.channelToeV = 10. #self.ketek.dynamicRange / len(self.ketek.channel00)
+        self.fluodet.presettype = 1
+        self.fluodet.peakingtime = 2.5
+        self.channelToeV = 10. #self.fluodet.dynamicRange / len(self.fluodet.channel00)
         
         try:
             os.mkdir(directory)
@@ -124,18 +124,17 @@ class XfeCollect(object):
         k = 0
         self.obx.Open()
         self.insertDetector()
-        #while not .75 < self.inverseDeadTime < .85:
         while not .6 < self.tentativeDeadTime < .65:
             if self.transmission() > 4:
                 break
             
             self.measureSpectrum()
-            ICR = self.ketek.inputCountRate00
-            OCR = self.ketek.outputCountRate00
-            eventTime = self.ketek.realTime00
+            ICR = self.fluodet.inputCountRate00
+            OCR = self.fluodet.outputCountRate00
+            eventTime = self.fluodet.realTime00
             self.inverseDeadTime = 1. - (OCR / ICR) # * eventTime
             self.tentativeDeadTime = (OCR / ICR)
-            k+=1
+            k += 1
             print 'Cycle %d, deadtime is %f' % (k, self.inverseDeadTime)
             self.adjustTransmission()
         print 'Transmission optimized at %s, the deadtime is %s' % (self.currentTransmission, self.inverseDeadTime)
@@ -145,20 +144,18 @@ class XfeCollect(object):
         
     def adjustTransmission(self):
         self.currentTransmission = self.transmission()
-        self.previousTransmission = 0
         print 'current transmission is %f' % self.currentTransmission
         print 'the deadtime is %f' % self.inverseDeadTime
-        if self.tentativeDeadTime < 0.6:
+        if self.tentativeDeadTime < 0.6: #too much flux
             self.highBoundary = self.setTransmission
             self.setTransmission -= (self.highBoundary - self.lowBoundary)/2.
-        else:
+        else: #too little flux
             self.lowBoundary = self.setTransmission
             if self.highBoundary is None:
                 self.setTransmission *= 2
             else:
                 self.setTransmission += (self.highBoundary - self.lowBoundary)/2.
         self.transmission(self.setTransmission)
-        self.previousTransmission = self.currentTransmission
         
         
     def canSpectrum(self):
@@ -166,10 +163,10 @@ class XfeCollect(object):
         
     def setIntegrationTime(self, integrationTime = 1.):
         #self.counter.integrationTime = integrationTime
-        self.ketek.presetvalue = int(integrationTime)
+        self.fluodet.presetvalue = int(integrationTime)
         
     def setROI(self, roi_debut = 0., roi_fin = 2048.):
-        self.ketek.SetROIs(numpy.array((roi_debut, roi_fin)))
+        self.fluodet.SetROIs(numpy.array((roi_debut, roi_fin)))
         #pass
     
     def insertDetector(self):
@@ -186,7 +183,7 @@ class XfeCollect(object):
         
     def cancelXfeSpectrum(self):
         self.md2.CloseFastShutter()
-        self.ketek.Abort()
+        self.fluodet.Abort()
         self.obx.Close()
         self.extractDetector()
         
@@ -201,12 +198,12 @@ class XfeCollect(object):
         self.md2.PhasePosition = 4
         self.wait(self.md2)
         self.md2.OpenFastShutter()
-        self.ketek.Start()
+        self.fluodet.Start()
         #self.counter.Start()
         time.sleep(int(self.integrationTime))
         #while self.counter.State().name != 'STANDBY':
             #pass
-        #self.ketek.Abort()
+        #self.fluodet.Abort()
         self.wait(self.md2)
         self.md2.CloseFastShutter()
         if self.optimize != True:
@@ -214,17 +211,17 @@ class XfeCollect(object):
             self.extractDetector()
         
     def getSpectrum(self):
-        return self.ketek.channel00
+        return self.fluodet.channel00
         
     def getMcaConfig(self):
         return {'att': '7', 'energy': 12.65, 'bsX': 1, 'bsY': 2 }
         
     def getXvals(self):
-        start, end   = 0, 2048 #self.ketek.roisStartsEnds
+        start, end   = 0, 2048 #self.fluodet.roisStartsEnds
         #energy_start = start * self.channelToeV
         #energy_end   = end   * self.channelToeV
         #step = (energy_end - energy_start) / len(ketek.channel00)
-        step = 1 #(end - start) / len(self.ketek.channel00)
+        step = 1 #(end - start) / len(self.fluodet.channel00)
         return numpy.arange(start, end, step)
         
     def saveData(self):
