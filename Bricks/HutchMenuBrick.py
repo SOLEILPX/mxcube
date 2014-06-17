@@ -669,6 +669,7 @@ class HutchMenuBrick(BlissWidget):
 
     # Update both zoom and slits when started
     def run(self):
+        logging.getLogger().info("HucthMenuBrick runs")
         if self.minidiff is not None:
             zoom=self.minidiff.zoomMotor
             if zoom is not None:
@@ -724,9 +725,11 @@ class HutchMenuBrick(BlissWidget):
             else:
 		self.emit(PYSIGNAL("calibrationChanged"), (self.__scaleX, self.__scaleY))
                 #self.slitsPositionChanged()
+                logging.getLogger().info("HutchMenuBrick runs. It will now update the beam drawing")
                 self.updateBeam(force=True)
         except:
             logging.getLogger().exception("HutchMenuBrick: problem starting up display")
+        logging.getLogger().info("HucthMenuBrick runs cool")
 
     def _drawBeam(self):
         try:
@@ -741,6 +744,7 @@ class HutchMenuBrick(BlissWidget):
             self.__rectangularBeam.setSlitboxSize(0,0)
             self.__beam.setSize(self.beam_size[0] * self.pixels_per_mm[0],\
 				self.beam_size[1] * self.pixels_per_mm[1])
+            logging.getLogger().info("beam drawn with size %s " % str(self.beam_size))
             self.__beam.show()
         except:
           pass
@@ -751,25 +755,32 @@ class HutchMenuBrick(BlissWidget):
     #    self._drawBeam()
 
     def updateBeam(self,force=False):
+        logging.getLogger().info("updating beam " )
         if self["displayBeam"]:
               if not self.minidiff.isReady(): time.sleep(0.2)
               try:
                  self.__rectangularBeam.set_xMid_yMid(self.beam_position[0],
 						      self.beam_position[1])
+                 logging.getLogger().info("rectangle drawn at position %s " % str(self.beam_position))
               except AttributeError:
+                 import traceback
+                 logging.getLogger().info("update beam failed 1" + traceback.format_exc())
                  pass
               try:
-                self.__beam.move(self.beam_position[0], self.beam_position[1])
-		self._drawBeam()
+                 self.__beam.move(self.beam_position[0], self.beam_position[1])
+		 self._drawBeam()
                 #try:
 		#  self._updateBeam(self.beamInfo.get_beam_info())
                 #except:
                 #  logging.getLogger().exception("Could not get beam size: cannot display beam")
                 #  self.__beam.hide()
               except AttributeError:
+                import traceback
+                logging.getLogger().info("update beam failed 2" + traceback.format_exc())
                 pass
     
     def beamPosChanged(self, position):
+        logging.getLogger().info("hutch menu brick. Beam position chagned.  It is %s" % str(position))
 	self.beam_position = position
 	self.emit(PYSIGNAL("beamPositionChanged"), (self.beam_position[0],\
 						    self.beam_position[1],
@@ -778,6 +789,7 @@ class HutchMenuBrick(BlissWidget):
 	self.updateBeam(True)
 
     def beamInfoChanged(self, beam_info):
+        logging.getLogger().info("hutch menu brick. Beam info chagned.  It is %s" % str(beam_info))
         self.beam_size = (beam_info["size_x"], beam_info["size_y"])
         self.beam_shape = beam_info["shape"]
     	self.updateBeam(True)
