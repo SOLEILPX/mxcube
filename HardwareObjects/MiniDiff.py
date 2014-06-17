@@ -224,12 +224,6 @@ class MiniDiff(Equipment):
             self.camera is not None
 
 
-    def getBeamInfo(self, callback=None, error_callback=None):
-        logging.info(" I AM command getBeamInfo in MiniDiff.py ")
-        cmd_obj = self.getCommandObject("getBeamInfo")
-        if cmd_obj:
-           cmd_obj( callback, error_callback )
-
     def apertureChanged(self, *args):
         # will trigger minidiffReady signal for update of beam size in video
         self.equipmentReady()
@@ -301,26 +295,25 @@ class MiniDiff(Equipment):
 
 
     def phizMotorMoved(self, pos):
-        #if time.time() - self.centredTime > 2.0:
+        if time.time() - self.centredTime > 1.0:
           self.invalidateCentring()
 
     def phiyMotorMoved(self, pos):
-        #if time.time() - self.centredTime > 2.0:
+        if time.time() - self.centredTime > 1.0:
            self.invalidateCentring()
 
-
     def sampleXMotorMoved(self, pos):
-        #if time.time() - self.centredTime > 2.0:
+        if time.time() - self.centredTime > 1.0:
            self.invalidateCentring()
 
 
     def sampleYMotorMoved(self, pos):
-        #if time.time() - self.centredTime > 2.0:
+        if time.time() - self.centredTime > 1.0:
            self.invalidateCentring()
 
 
     def sampleChangerSampleIsLoaded(self, state):
-        #if time.time() - self.centredTime > 2.0:
+        if time.time() - self.centredTime > 1.0:
            self.invalidateCentring()
 
     def getBeamPosX(self):
@@ -430,7 +423,6 @@ class MiniDiff(Equipment):
         return x, y
  
     def manualCentringDone(self, manual_centring_procedure):
-        logging.info("manual centring DONE")
         try:
           motor_pos = manual_centring_procedure.get()
           if isinstance(motor_pos, gevent.GreenletExit):
@@ -439,7 +431,6 @@ class MiniDiff(Equipment):
           logging.exception("Could not complete manual centring")
           self.emitCentringFailed()
         else:
-          logging.info("Moving sample to centred position. manualCentringProcedure: %s", str(self.currentCentringProcedure) )
           self.emitProgressMessage("Moving sample to centred position...")
           self.emitCentringMoving()
           try:
@@ -449,8 +440,8 @@ class MiniDiff(Equipment):
             logging.exception("Could not move to centred position")
             logging.debug( traceback.format_exc() )
             self.emitCentringFailed()
-          #logging.info("EMITTING CENTRING SUCCESSFUL")
           self.centredTime = time.time()
+          self.emitProgressMessage("    - moved to centred position finished")
           self.emitCentringSuccessful()
           self.emitProgressMessage("")
 
@@ -536,7 +527,6 @@ class MiniDiff(Equipment):
 
     def emitCentringSuccessful(self):
         if self.currentCentringProcedure is not None:
-            logging.info("MiniDiff: emitting centringSuccessful ")
             curr_time=time.strftime("%Y-%m-%d %H:%M:%S")
             self.centringStatus["endTime"]=curr_time
             self.centringStatus["motors"]=self.getPositions()
@@ -635,7 +625,7 @@ class MiniDiff(Equipment):
            self.emit('centringSnapshots', (True,))
            self.emitProgressMessage("")
         self.emitProgressMessage("Sample is centred!")
-        self.emit('centringAccepted', (True,self.getCentringStatus()))
+        #self.emit('centringAccepted', (True,self.getCentringStatus()))
 
 
 

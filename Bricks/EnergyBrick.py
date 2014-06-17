@@ -391,11 +391,11 @@ class EnergyBrick(BlissWidget):
         self.newValue.setEnabled(state)
         #self.applyButton.setEnabled(state)
 
-    def changeEnergyStarted(self):
+    def changeEnergyStarted(self,par=None):
         self.stopButton.setEnabled(True)
         self.setWidgetColor('moving')
 
-    def changeEnergyOk(self):
+    def changeEnergyOk(self,state=None):
         self.stopButton.setEnabled(False)
         #self.newValue.blockSignals(True)
         self.newValue.setText("")

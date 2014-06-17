@@ -259,6 +259,7 @@ class TreeBrick(BaseComponents.BlissWidget):
         Connected to the signal loggedIn of ProposalBrick2.
         The signal is emitted when a user was succesfully logged in.
         """
+        logging.info("Tree brick - logged_in received %s " % logged_in)
         self.enable_collect(logged_in)
 
         #if not logged_in:

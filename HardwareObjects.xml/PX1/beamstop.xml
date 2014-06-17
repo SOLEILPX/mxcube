@@ -1,0 +1,22 @@
+<device class = "TangoBeamStop">
+  <username>Beamstop</username>
+  <tangoname>i10-c-cx1/ex/bst.1-ev</tangoname>
+  <tangoname2>i10-c-cx1/ex/light.1-pos</tangoname2>  
+  <channel type="tango" polling="1000" name="state">State</channel>
+  <command type="tango" name="close">Extract</command>
+  <command type="tango" name="open">Insert</command>
+</device>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

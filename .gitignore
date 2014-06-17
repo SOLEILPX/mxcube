@@ -2,7 +2,15 @@
 *.swp
 *~
 mxcube.gui
+*.sav
+*.sav1
+*.sav2
 *current
 *saved
 *old
 ,out
+*.bak
+*.new
+*.bck1
+,out*
+*backup*

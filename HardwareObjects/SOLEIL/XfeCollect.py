@@ -9,10 +9,7 @@ import pylab
 import numpy
 import os
 import pickle
-import math
-from xabs_lib import *
-    
-#sys.exit()
+# from xabs_lib import *
 
 #md2             = PyTango.DeviceProxy('i11-ma-cx1/ex/md2')
 #ketek           = PyTango.DeviceProxy('i11-ma-cx1/dt/dtc-mca_xmap.1')
@@ -39,7 +36,6 @@ class XfeCollect(object):
         self.fluodet.presettype = 1
         self.fluodet.peakingtime = 2.5
         self.channelToeV = 10. #self.fluodet.dynamicRange / len(self.fluodet.channel00)
-        
         try:
             os.mkdir(directory)
         except OSError, e:
@@ -157,7 +153,6 @@ class XfeCollect(object):
                 self.setTransmission += (self.highBoundary - self.lowBoundary)/2.
         self.transmission(self.setTransmission)
         
-        
     def canSpectrum(self):
         return True
         
@@ -170,12 +165,21 @@ class XfeCollect(object):
         #pass
     
     def insertDetector(self):
-        self.md2.write_attribute('FluoDetectorBack', 0)
-        time.sleep(5)
+#        self.md2.write_attribute('FluoDetectorBack', 0)
+#        time.sleep(5)
+        self.ketek_ins.Insert()
+        time.sleep(1.0)            
+        while str(self.ketek_ins.State()) == 'MOVING':
+                time.sleep(0.2)            
+
     
     def extractDetector(self):
-        self.md2.write_attribute('FluoDetectorBack', 1)
-        time.sleep(5)
+#        self.md2.write_attribute('FluoDetectorBack', 1)
+#        time.sleep(5)
+        self.ketek_ins.Extract()
+        time.sleep(0.2)            
+        while str(self.ketek_ins.State()) == 'MOVING':
+                time.sleep(0.2)            
     
     def startXfeSpectrum(self):
         self.measureSpectrum()
@@ -215,7 +219,7 @@ class XfeCollect(object):
         
     def getMcaConfig(self):
         return {'att': '7', 'energy': 12.65, 'bsX': 1, 'bsY': 2 }
-        
+    
     def getXvals(self):
         start, end   = 0, 2048 #self.fluodet.roisStartsEnds
         #energy_start = start * self.channelToeV
@@ -223,7 +227,10 @@ class XfeCollect(object):
         #step = (energy_end - energy_start) / len(ketek.channel00)
         step = 1 #(end - start) / len(self.fluodet.channel00)
         return numpy.arange(start, end, step)
-        
+
+    def getValue(self):
+	return self.getXvals(), self.getSpectrum()
+
     def saveData(self):
         f = open(self.filename[:-4]  + '.pck', 'w')
         x = self.getXvals()
@@ -234,7 +241,8 @@ class XfeCollect(object):
     def plotSpectrum(self):
         x = self.getXvals()
         y = self.getSpectrum()
-        self.saveData(x, y)
+#        self.saveData(x, y)
+        self.saveData()
         
         pylab.figure()
         pylab.plot(x, y)
@@ -264,4 +272,4 @@ if __name__ == '__main__':
     #doCollect.setIntegrationTime()
     doCollect.measureSpectrum()
     doCollect.plotSpectrum()
-    
+
