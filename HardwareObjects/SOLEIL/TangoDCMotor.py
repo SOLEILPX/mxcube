@@ -134,9 +134,10 @@ class TangoDCMotor(Device):
     
     def syncMove(self, position):
         prev_position      = self.getPosition()
-        self.positionValue = position
-
-        time.sleep(0.5) # allow MD2 to change the state
+        #self.positionValue = position
+        relative_position = position - prev_position
+        self.syncMoveRelative(relative_position)
+        time.sleep(0.2) # allow MD2 to change the state
         while self.stateValue == "RUNNING" or self.stateValue == "MOVING": # or self.stateValue == SpecMotor.MOVESTARTED:
             qApp.processEvents(100)
 
@@ -163,7 +164,7 @@ class TangoDCMotor(Device):
         self.positionChan.setValue( self.convertValue(self.positionValue) )
 
         dev = DeviceProxy(self.tangoname)
-        time.sleep(0.5) # allow MD2 to change the state
+        time.sleep(0.2) # allow MD2 to change the state
 
         mystate = str( dev.State() )
         logging.info("TangoDCMotor: %s syncMoveRelative state is %s / %s " % ( self.tangoname, str( self.stateValue ), mystate))
@@ -176,8 +177,8 @@ class TangoDCMotor(Device):
         
     def getMotorMnemonic(self):
         return self.name()
-
-    def move(self, absolutePosition):
+    
+    def move(self, absolutePosition, epsilon=0., sync=False):
         """Move the motor to the required position
 
         Arguments:
@@ -188,7 +189,8 @@ class TangoDCMotor(Device):
         logging.info("TangoDCMotor: move. motor will go to %s " % str(absolutePosition))   
         logging.getLogger("HWR").info("TangoDCMotor.move to absolute position: %.3f" % absolutePosition)
         logging.getLogger("TangoClient").info("TangoDCMotor move. Trying to go to %s: that is a '%s'", absolutePosition, type(absolutePosition))
-        self.positionChan.setValue( self.convertValue(absolutePosition) )
+        if abs(self.getPosition() - absolutePosition) > epsilon:
+            self.positionChan.setValue( self.convertValue(absolutePosition) )
 
     def stop(self):
         logging.getLogger("HWR").info("TangoDCMotor.stop")
