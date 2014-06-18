@@ -5,6 +5,9 @@
   <channel type="tango" polling="2000" name="position">intensity</channel>
   <channel type="tango" polling="2000" name="state">State</channel>
   <command type="tango" tangoname="i10-c-cx1/ex/light.1" name="move">move</command>
+  <command type="tango" tangoname="i10-c-cx1/ex/light.1-pos" name="wagoIn">Insert</command>
+  <command type="tango" tangoname="i10-c-cx1/ex/light.1-pos" name="wagoOut">Extract</command>
+  <command type="tango" tangoname="i10-c-cx1/ex/light.1-pos" name="getWagoState">State</command>
   <interval>1000</interval>
   <GUIstep>10.</GUIstep>
 </device>

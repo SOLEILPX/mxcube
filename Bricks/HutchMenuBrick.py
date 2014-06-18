@@ -756,6 +756,10 @@ class HutchMenuBrick(BlissWidget):
 
     def updateBeam(self,force=False):
         logging.getLogger().info("updating beam " )
+
+        if self.minidiff is None:
+              return
+
         if self["displayBeam"]:
               if not self.minidiff.isReady(): time.sleep(0.2)
               try:
