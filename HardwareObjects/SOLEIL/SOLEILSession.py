@@ -11,7 +11,7 @@ import time
 from HardwareRepository.BaseHardwareObjects import HardwareObject
 
 
-class Session(HardwareObject):
+class SOLEILSession(HardwareObject):
     def __init__(self, name):
         HardwareObject.__init__(self, name)
         self.session_id = None
