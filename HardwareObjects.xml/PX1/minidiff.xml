@@ -2,6 +2,11 @@
 <!-- <?xml version="1.0" encoding="iso-8859-1"?> -->
 <equipment class="MiniDiffPX1">
     <username>Goniometer</username>
+
+    <wagolight>/lightarm</wagolight>
+    <bstop>/beamstop</bstop>
+    <samplechanger>/sc-mockup</samplechanger>
+
    <!-- <tangoname>i11-ma-cx1/ex/md2</tangoname>-->
     <phiy_direction>-1</phiy_direction>
     
@@ -58,6 +63,4 @@
             <!-- device role="beamcenterz" hwrid="/beamcenterZ"></device -->
         </sample>
     </motors>
-    <wagolight>/light</wagolight>
-    <samplechanger>/sc-mockup</samplechanger>
 </equipment>

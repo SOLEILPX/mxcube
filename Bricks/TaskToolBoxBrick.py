@@ -200,6 +200,7 @@ class TaskToolBoxBrick(BaseComponents.BlissWidget):
         """
         p_dict = {}
 
+        logging.getLogger().debug( "TaskToolBrick.new centred position. %s " % str(centring_status))
         if 'motors' in centring_status and \
                 'extraMotors' in centring_status:
 

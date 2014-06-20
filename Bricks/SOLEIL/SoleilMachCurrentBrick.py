@@ -93,7 +93,8 @@ class SoleilMachCurrentBrick(BaseComponents.BlissWidget):
         QToolTip.add(self.mode,"Fill mode")
         QToolTip.add(self.refillCountdown,"Life time") # Modif Pierre.L 18.03.08
 
-    def setValue(self,value=None,opmsg=None,fillmode=None,refill=None):
+    def setValue(self,value,opmsg,fillmode,refill):
+        #logging.getLogger().info(" new value for machine current is: \n\t%s\n\t%s\n\t%s\n\t%s " % (str(value), str(opmsg), str(fillmode), str(refill)))
         if value is None:
             value=self.lastValue
         else:
@@ -162,15 +163,19 @@ class SoleilMachCurrentBrick(BaseComponents.BlissWidget):
         if propertyName=='mnemonic':
             if self.machCurrent is not None:
                 self.disconnect(self.machCurrent,PYSIGNAL('valueChanged'),self.setValue)
-                self.disconnect(self.machCurrent,PYSIGNAL('timeout'),self.setValue)
-
-            self.setValue()
+                #self.disconnect(self.machCurrent,PYSIGNAL('timeout'),self.setValue)
 
             self.machCurrent=self.getHardwareObject(newValue)
+
             if self.machCurrent is not None:
+                ret = self.machCurrent.updatedValue()
+                if ret:
+                    mach, opmsg, fillmode, refill  = ret
+                    self.setValue(value=mach, opmsg=opmsg, fillmode=fillmode, refill=refill)
+
                 self.containerBox.setEnabled(True)
                 self.connect(self.machCurrent,PYSIGNAL('valueChanged'),self.setValue)
-                self.connect(self.machCurrent,PYSIGNAL('timeout'),self.setValue)
+                #self.connect(self.machCurrent,PYSIGNAL('timeout'),self.setValue)
             else:
                 self.containerBox.setEnabled(False)
         else:

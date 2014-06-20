@@ -1,4 +1,8 @@
-<procedure class="PX1MultiCollect">
+<object class="PX1MultiCollect">
+
+   <collectname>i10-c-cx1/ex/collect</collectname>
+   <pilatusname>i10-c-cx1/dt/pilatus</pilatusname>
+   <oscaxis>Phi</oscaxis>
 
    <!-- object href="/dbconnection-mockup" role="dbserver" / -->
    <object href="/obx" role="safety_shutter" />
@@ -11,15 +15,11 @@
    <object href="/detectordistance" role="detector_distance" />
    <object href="/mach" role="machine_current" />
    <object href="/resolution" role="resolution" />
+   <object href="/kappa" role="kappa" />
+   <object href="/phi" role="phi" />
+   <object href="/omega" role="omega" />
+   <!-- object href="/flux" role="flux" / -->
 
-   <!-- Following values are for ADSC detector -->
-   <adscname>i11-ma-cx1/dt/adsc</adscname>
-   <limaadscname>i11-ma-cx1/dt/limaadsc</limaadscname>
-   <headername>i11-ma-cx1/ex/header</headername>
-   <xformstatusfile>/927bis/ccd/.lastImage</xformstatusfile>
-   <mono1name>i11-ma-c03/op/mono1</mono1name>
-   <detmttsname>i11-ma-cx1/dt/dtc_ccd.1-mt_ts</detmttsname>
-   <detmttxname>i11-ma-cx1/dt/dtc_ccd.1-mt_tx</detmttxname>
-   <detmttzname>i11-ma-cx1/dt/dtc_ccd.1-mt_tz</detmttzname>
+   <directory_prefix>PX1</directory_prefix>
 
-</procedure>
+</object>

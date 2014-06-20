@@ -17,7 +17,8 @@
   <!--<object href="/workflow-mockup" role="workflow"/> -->
  
   <!-- Procedures and routines -->
-  <object href="/BLEnergy" role="energy"/>
+  <!-- object href="/BLEnergy" role="energy"/-->
+  <object href="/energyscan" role="energy"/>
   <object href="/mxcollect" role="collect"/>
 
   <!-- Is it possible to change the beam wavelentgh.
