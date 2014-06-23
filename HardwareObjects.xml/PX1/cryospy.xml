@@ -1,0 +1,6 @@
+<device class="TangoCryo">
+  <username>Cryo</username>
+  <tangoname>tmp/oxford/test</tangoname>
+  <channel type="tango" polling="2000" name="temperature">sampleTemp</channel>
+  <channel type="tango" polling="2000" name="state">State</channel>
+</device>
