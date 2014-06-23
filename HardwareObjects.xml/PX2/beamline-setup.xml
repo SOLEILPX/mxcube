@@ -3,7 +3,7 @@
 <object class="BeamlineSetup" role="BeamlineSetup">
 
   <!-- Objects directly associatd with hardware -->
-  <object href="/transmission"  role="transmission"/>
+  <object href="/Ps_attenuator"  role="transmission"/>
   <object href="/minidiff"      role="diffractometer"/>
   <object href="/cats"          role="sample_changer"/>    
   <object href="/resolution"    role="resolution"/>
