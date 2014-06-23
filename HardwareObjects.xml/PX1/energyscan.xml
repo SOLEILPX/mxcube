@@ -13,7 +13,7 @@
     <bst>i10-c-cx1/ex/bst.1-ev</bst> 
     <ketekinsert>i10-c-cx1/dt/dtc_sdd.1-pos</ketekinsert> 
     <fastshutter>i10-c-cx1/ex/spishutter-pos</fastshutter>
-    <directoryprefix>/data1/proxima1-soleil/2013_Run5</directoryprefix>
+    <directoryprefix>/session</directoryprefix>
     <scan>
         <roiwidth>0.35</roiwidth>
         <before>0.05</before>
