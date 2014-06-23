@@ -35,12 +35,14 @@ class TangoMachCurrent(Device):
             #opmsg = self.device.read_attribute("message").value
             opmsg = self.device.read_attribute("operatorMessage").value
             opmsg = opmsg.strip()
-            opmsg = opmsg.replace(': Faisceau disponible', ':\nFaisceau disponible')
+            i1 =  opmsg.index(':', 2)
+            i2 = opmsg.index(':', 3)
+            opmsg = opmsg[: i1 + 3]
             #' ' #On Gavin's request ;-)
             #fillmode = self.device.DevReadFillMode()
             fillmode = self.device.read_attribute("fillingMode").value + " filling"
             fillmode = fillmode.strip()
-            fillmode += ': ' + opmsg[opmsg.rindex(':') + 2:]
+            #fillmode += ': ' + opmsg[opmsg.rindex(':') + 2:]
             
         except AttributeError:
             #self.device.command_inout("Init")
