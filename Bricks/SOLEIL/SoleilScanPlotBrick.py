@@ -9,38 +9,22 @@ import logging
 from qt import *
 from PyMca.QtBlissGraph import QtBlissGraph
 from BlissFramework.BaseComponents import BlissWidget
-#from SpecClient import SpecScan
 
 __category__ = 'Scans'
-
-#class QSpecScan(QObject, SpecScan.SpecScanA):
-#    def __init__(self, specVersion):
-#        QObject.__init__(self)
-#        SpecScan.SpecScanA.__init__(self, specVersion)
-    
-
-#    def newScan(self, scanParameters):
-#        self.emit(PYSIGNAL('newScan'), (scanParameters, ))
-
-
-#    def newScanPoint(self, i, x, y):
-#        self.emit(PYSIGNAL('newPoint'), (x, y, ))
 
 class SoleilScanPlotBrick(BlissWidget):
     def __init__(self, *args):
         BlissWidget.__init__(self, *args)
 
-#        self.defineSignal('newScan', ())
         self.defineSlot('newScan', ())
 	
-	self.defineSlot('newScanPoint',())
+        self.defineSlot('newScanPoint',())
 
         self.scanObject = None
         self.xdata = []
         self.ydata = []
 
         self.isConnected = None
-        #self.canAddPoint = None
         self.canAddPoint = True
 
         self.addProperty('specVersion', 'string', '')
@@ -49,23 +33,12 @@ class SoleilScanPlotBrick(BlissWidget):
         self.lblTitle = QLabel(self)
         self.graphPanel = QFrame(self)
         buttonBox = QHBox(self)
-        #self.cmdZoomIn = QToolButton(buttonBox)
-        #self.cmdZoomOut = QToolButton(buttonBox)
         self.lblPosition = QLabel(buttonBox)
         self.graph = QtBlissGraph(self.graphPanel)
                          
         QObject.connect(self.graph, PYSIGNAL('QtBlissGraphSignal'), self.handleBlissGraphSignal)
         QObject.disconnect(self.graph, SIGNAL('plotMousePressed(const QMouseEvent&)'), self.graph.onMousePressed)
         QObject.disconnect(self.graph, SIGNAL('plotMouseReleased(const QMouseEvent&)'), self.graph.onMouseReleased)
-        #QObject.connect(self.cmdZoomIn, SIGNAL('clicked()'), self.cmdZoomInClicked)
-        #QObject.connect(self.cmdZoomOut, SIGNAL('clicked()'), self.cmdZoomOutClicked)
-
-        #self.cmdZoomIn.setIconSet(QIconSet(Icons.load("zoomin")))
-        #self.cmdZoomOut.setIconSet(QIconSet(Icons.load("zoomout")))
-        #self.cmdZoomIn.setToggleButton(True)
-        #self.cmdZoomOut.setToggleButton(True)
-        #self.cmdZoomIn.setUsesTextLabel(False)
-        #self.cmdZoomOut.setUsesTextLabel(False)
         self.graph.canvas().setMouseTracking(True)
         self.graph.enableLegend(False)
         self.graph.enableZoom(False)
@@ -90,7 +63,6 @@ class SoleilScanPlotBrick(BlissWidget):
             if self.scanObject is not None:
                 self.safeDisconnect()
                 
-#            self.scanObject = QSpecScan(newValue)
             self.scanObject = None
             if self.scanObject is not None:
                 self.safeConnect()
@@ -112,15 +84,10 @@ class SoleilScanPlotBrick(BlissWidget):
                
 
     def newScan(self, scanParameters):
-        #self.canAddPoint = True
-        #self.emit(PYSIGNAL('newScan'), ())
+        logging.info('newScan scanParameters %s' % str(scanParameters) )
         self.lblTitle.setText('<nobr><b>%s</b></nobr>' % scanParameters['title'])
         self.graph.xlabel(scanParameters['xlabel'])
         self.graph.ylabel(scanParameters['ylabel'])
-#        if self.scanObject.getScanType() == SpecScan.TIMESCAN:
-#            self.graph.setx1timescale(True)
-#        else:
-#            self.graph.setx1timescale(False)
         self.graph.setx1timescale(False)
         self.xdata = []
         self.ydata = []
@@ -128,11 +95,10 @@ class SoleilScanPlotBrick(BlissWidget):
         self.graph.replot() 
 
     def newScanPoint(self, x, y):
-        #if not self.canAddPoint:
-        #    return
+        logging.info('newScanPoint x %s, y %s' % (x,y))
         self.xdata.append(x)
         self.ydata.append(y)
-        self.graph.newcurve('scan', self.xdata, self.ydata)
+        self.graph.newcurve('scan', self.xdata, self.ydata, curveinfo='bo-')
         self.graph.replot() 
         
     def handleBlissGraphSignal(self, signalDict):
@@ -142,53 +108,14 @@ class SoleilScanPlotBrick(BlissWidget):
 
     def safeConnect(self):
         if not self.isConnected:
-            self.connect(self.scanObject, PYSIGNAL('newScan'), self.newScan)
+            self.connect(self.scanObject, PYSIGNAL('newScanPoint'), self.newScan)
             self.connect(self.scanObject, PYSIGNAL('newPoint'), self.newScanPoint)
             self.isConnected=True
-
 
     def safeDisconnect(self):
         if self.isConnected:
             self.disconnect(self.scanObject, PYSIGNAL('newScan'), self.newScan)
             self.disconnect(self.scanObject, PYSIGNAL('newScanPoint'), self.newScanPoint)
-            #self.canAddPoint = False
             self.isConnected = False
 
 
-    #def instanceMirrorChanged(self,mirror):
-    #    if BlissWidget.isInstanceMirrorAllow():
-    #        self.safeConnect()
-    #    else:
-    #        self.safeDisconnect()
-
-
-    """
-    def cmdZoomInClicked(self):
-        if self.cmdZoomIn.isOn():
-            self.cmdZoomOut.setOn(False)
-
-            self.graph.disablezoomback()           
-
-        #QObject.disconnect(self.graph, SIGNAL('plotMousePressed(const QMouseEvent&)'), self.graph.onMousePressed)
-        #QObject.disconnect(self.graph, SIGNAL('plotMouseReleased(const QMouseEvent&)'), self.graph.onMouseReleased)
-        if not self.cmdZoomOut.isOn() and not self.cmdZoomIn.isOn():
-            pass
-        else:
-            QObject.connect(self.graph, SIGNAL('plotMousePressed(const QMouseEvent&)'), self.graph.onMousePressed)
-            QObject.connect(self.graph, SIGNAL('plotMouseReleased(const QMouseEvent&)'), self.graph.onMouseReleased)
-
-
-    def cmdZoomOutClicked(self):
-        if self.cmdZoomOut.isOn():
-            self.cmdZoomIn.setOn(False)
-
-            self.graph.enablezoomback()
-
-        #QObject.disconnect(self.graph, SIGNAL('plotMousePressed(const QMouseEvent&)'), self.graph.onMousePressed)
-        #QObject.disconnect(self.graph, SIGNAL('plotMouseReleased(const QMouseEvent&)'), self.graph.onMouseReleased)
-        if not self.cmdZoomOut.isOn() and not self.cmdZoomIn.isOn():
-            pass
-        else:
-            QObject.connect(self.graph, SIGNAL('plotMousePressed(const QMouseEvent&)'), self.graph.onMousePressed)
-            QObject.connect(self.graph, SIGNAL('plotMouseReleased(const QMouseEvent&)'), self.graph.onMouseReleased)
-    """
