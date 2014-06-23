@@ -146,7 +146,7 @@ class SoleilMachCurrentBrick(BaseComponents.BlissWidget):
         
         if opmsg is not None and opmsg!="" and opmsg!="unknown":
             QToolTip.add(self.current,opmsg)
-            self.emit(PYSIGNAL("operatorMessage"),(opmsg,))
+            self.emit(PYSIGNAL("operatorMessage"),(opmsg[:10],))
 
     def setStateColor(self,state):
         color=self.STATES[state]
