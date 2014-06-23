@@ -145,6 +145,20 @@ class SOLEILEnergyScan(Equipment):
     def sDisconnected(self):
         self.emit('disconnected', ())
 
+    def setElement(self):
+        logging.getLogger("HWR").debug('EnergyScan: setElement')
+        self.emit('setElement', (self._element, self._edge))
+        
+    def newPoint(self, x, y):
+        logging.getLogger("HWR").debug('EnergyScan:newPoint')
+        logging.info('EnergyScan newPoint %s, %s' % (x, y))
+        self.emit('addNewPoint', (x, y))
+        self.emit('newScanPoint', (x, y))
+
+    def newScan(self,scanParameters):
+        logging.getLogger("HWR").debug('EnergyScan:newScan')
+        self.emit('newScan', (scanParameters,))
+
     # Energy scan commands
     def canScanEnergy(self):
         if not self.isConnected():
@@ -157,7 +171,8 @@ class SOLEILEnergyScan(Equipment):
         self._element = element
         self._edge = edge
         logging.getLogger("HWR").debug('EnergyScan: starting energy scan %s, %s' % (self._element, self._edge))
-        self.xanes = Xanes.xanes(element, edge, directory, prefix, session_id, blsample_id, test=False)
+        self.setElement()
+        self.xanes = Xanes.xanes(self, element, edge, directory, prefix, session_id, blsample_id, plot=False, test=True)
         self.scanInfo={"sessionId":session_id,"blSampleId":blsample_id,"element":element,"edgeEnergy":edge}
         if self.fluodetectorHO is not None:
             self.scanInfo['fluorescenceDetector']=self.fluodetectorHO.userName()
@@ -169,6 +184,13 @@ class SOLEILEnergyScan(Equipment):
                 logging.getLogger("HWR").error("EnergyScan: error creating directory %s (%s)" % (directory,str(diag)))
                 self.emit('scanStatusChanged', ("Error creating directory",))
                 return False
+
+        scanParameter = {}
+        scanParameter['title'] = "Energy Scan"
+        scanParameter['xlabel'] = "Energy in keV"
+        scanParameter['ylabel'] = "Normalized counts"
+        self.newScan(scanParameter)
+
         #try:
             #curr=self.energyScanArgs.getValue()
         #except:
@@ -195,7 +217,7 @@ class SOLEILEnergyScan(Equipment):
         try:
             #self.doEnergyScan("%s %s" % (element,edge))
             self.scanCommandStarted()
-            self.xanes.scan()
+            self.xanes.scan() #start() #scan()
             self.scanCommandFinished('success')
         except:
             import traceback
@@ -290,9 +312,10 @@ class SOLEILEnergyScan(Equipment):
                 pass
 
             self.emit('energyScanFinished', (self.scanInfo,))
+            time.sleep(0.1)
+            self.emit('energyScanFinished2', (self.scanInfo,))
 
-
-    def doChooch(self, scanObject, elt, edge, scanArchiveFilePrefix, scanFilePrefix):
+    def doChooch(self, elt, edge, scanArchiveFilePrefix, scanFilePrefix):
         #symbol = "_".join((elt, edge))
         #scanArchiveFilePrefix = "_".join((scanArchiveFilePrefix, symbol))
 
@@ -302,9 +325,9 @@ class SOLEILEnergyScan(Equipment):
 
         #scanArchiveFilePrefix = scanArchiveFilePrefix + str(i) 
         #archiveRawScanFile=os.path.extsep.join((scanArchiveFilePrefix, "raw"))
-        #rawScanFile=os.path.extsep.join((scanFilePrefix, "raw"))
+        rawScanFile=os.path.extsep.join((scanFilePrefix, "raw"))
         scanFile=os.path.extsep.join((scanFilePrefix, "efs"))
-
+        logging.info('SOLEILEnergyScan doChooch rawScanFile %s, scanFile %s' % (rawScanFile, scanFile))
         #if not os.path.exists(os.path.dirname(scanArchiveFilePrefix)):
             #os.makedirs(os.path.dirname(scanArchiveFilePrefix))
         
@@ -349,16 +372,21 @@ class SOLEILEnergyScan(Equipment):
             #pyarch_f.close()
             #self.scanInfo["scanFileFullPath"]=str(archiveRawScanFile)
         scanData = self.xanes.raw
+        logging.info('scanData %s' % scanData)
+        logging.info('PyChooch file %s' % PyChooch.__file__)
         pk, fppPeak, fpPeak, ip, fppInfl, fpInfl, chooch_graph_data = PyChooch.calc(scanData, elt, edge, scanFile)
         rm=(pk+30)/1000.0
         pk=pk/1000.0
         savpk = pk
         ip=ip/1000.0
         comm = ""
+
         self.thEdge = self.xanes.e_edge
         logging.getLogger("HWR").info("th. Edge %s ; chooch results are pk=%f, ip=%f, rm=%f" % (self.thEdge, pk,ip,rm))
-
+        logging.info('math.fabs(self.thEdge - ip) %s' % math.fabs(self.thEdge - ip))
+        logging.info('self.thEdgeThreshold %s' % self.thEdgeThreshold)
         if math.fabs(self.thEdge - ip) > self.thEdgeThreshold:
+          logging.info('Theoretical edge too different from the one just determined')
           pk = 0
           ip = 0
           rm = self.thEdge + 0.03
@@ -367,18 +395,42 @@ class SOLEILEnergyScan(Equipment):
           logging.getLogger("HWR").warning('EnergyScan: calculated peak (%f) is more that 20eV %s the theoretical value (%f). Please check your scan and choose the energies manually' % (savpk, (self.thEdge - ip) > 0.02 and "below" or "above", self.thEdge))
 
         archiveEfsFile=os.path.extsep.join((scanArchiveFilePrefix, "efs"))
+
+        logging.info('archiveEfsFile %s' % archiveEfsFile)
+
+        # Check access to archive directory
+        dirname = os.path.dirname(archiveEfsFile)
+        if not os.path.exists(dirname): 
+            try:
+               os.makedirs( dirname )
+               logging.getLogger("user_level_log").error( "Chooch. Archive path (%s) created"  % dirname)
+            except OSError:
+               logging.getLogger("user_level_log").error( "Chooch. Archive path is not accessible (%s)" % dirname)
+               return None
+            except:
+               import traceback
+               logging.getLogger("user_level_log").error( "Error creating archive path (%s) \n   %s" % (dirname, traceback.format_exc()))
+               return None
+        else:
+            if not os.path.isdir(dirname):
+               logging.getLogger("user_level_log").error( "Chooch. Archive path does not seem to be a valid directory (%s)" % dirname)
+               return None
+
         try:
           fi=open(scanFile)
           fo=open(archiveEfsFile, "w")
         except:
+          import traceback
+          logging.getLogger("user_level_log").error( traceback.format_exc())
           self.storeEnergyScan()
           self.emit("energyScanFailed", ())
-          return
+          return None
         else:
           fo.write(fi.read())
           fi.close()
           fo.close()
 
+        logging.info('archive saved')
         self.scanInfo["peakEnergy"]=pk
         self.scanInfo["inflectionEnergy"]=ip
         self.scanInfo["remoteEnergy"]=rm
@@ -387,9 +439,12 @@ class SOLEILEnergyScan(Equipment):
         self.scanInfo["inflectionFPrime"]=fpInfl
         self.scanInfo["inflectionFDoublePrime"]=fppInfl
         self.scanInfo["comments"] = comm
-
+        logging.info('self.scanInfo %s' % self.scanInfo)
+        
+        logging.info('chooch_graph_data %s' % str(chooch_graph_data))
         chooch_graph_x, chooch_graph_y1, chooch_graph_y2 = zip(*chooch_graph_data)
         chooch_graph_x = list(chooch_graph_x)
+        logging.info('chooch_graph_x %s' %  str(chooch_graph_x))
         for i in range(len(chooch_graph_x)):
           chooch_graph_x[i]=chooch_graph_x[i]/1000.0
 
@@ -431,6 +486,7 @@ class SOLEILEnergyScan(Equipment):
 
         logging.getLogger("HWR").info("<chooch> returning" )
         self.emit('chooch_finished', (pk, fppPeak, fpPeak, ip, fppInfl, fpInfl, rm, chooch_graph_x, chooch_graph_y1, chooch_graph_y2, title))
+        self.choochResults = pk, fppPeak, fpPeak, ip, fppInfl, fpInfl, rm, chooch_graph_x, chooch_graph_y1, chooch_graph_y2, title
         return pk, fppPeak, fpPeak, ip, fppInfl, fpInfl, rm, chooch_graph_x, chooch_graph_y1, chooch_graph_y2, title
 
     def scanStatusChanged(self,status):
@@ -441,13 +497,14 @@ class SOLEILEnergyScan(Equipment):
         self.xanes.saveRaw()
         self.xanes.saveResults()
         
-        if self.dbConnection is None:
-            return
-        try:
-            session_id=int(self.scanInfo['sessionId'])
-        except:
-            return
-        gevent.spawn(StoreEnergyScanThread, self.dbConnection,self.scanInfo)
+        #if self.dbConnection is None:
+            #return
+        #try:
+            #session_id=int(self.scanInfo['sessionId'])
+        #except:
+            #return
+        #gevent.spawn(StoreEnergyScanThread, self.dbConnection,self.scanInfo)
+        logging.info('SOLEILEnergyScan storeEnergyScan OK')
         #self.storeScanThread.start()
 
     def updateEnergyScan(self,scan_id,jpeg_scan_filename):
