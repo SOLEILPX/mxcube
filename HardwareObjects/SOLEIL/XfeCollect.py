@@ -17,7 +17,7 @@ import pickle
 
 
 class XfeCollect(object):
-    def __init__(self, integrationTime = 1., directory = '/tmp', prefix = 'test', sessionId = None, sampleId = None):
+    def __init__(self, integrationTime = 1., directory = '/tmp', prefix = 'test', sessionId = None, sampleId = None, test=True):
         self.integrationTime = integrationTime
         self.directory = directory
         self.prefix = prefix
@@ -32,7 +32,7 @@ class XfeCollect(object):
         self.ble     = PyTango.DeviceProxy('i11-ma-c00/ex/beamlineenergy')
         self.monodevice = PyTango.DeviceProxy('i11-ma-c03/op/mono1')
         self.optimize = None
-        self.test = False
+        self.test = test
         self.fluodet.presettype = 1
         self.fluodet.peakingtime = 2.5
         self.channelToeV = 10. #self.fluodet.dynamicRange / len(self.fluodet.channel00)
@@ -50,7 +50,7 @@ class XfeCollect(object):
             
     def transmission(self, x=None):
         '''Get or set the transmission'''
-        #if self.test: return 0
+        if self.test: return 0
         Fp = PyTango.DeviceProxy('i11-ma-c00/ex/fp_parser')
         if x == None:
             return Fp.TrueTrans_FP
@@ -70,7 +70,7 @@ class XfeCollect(object):
         
     def secondaryTransmission(self, x=None):
         '''Get or set the transmission by secondary slits'''
-        #if self.test: return 0
+        if self.test: return 0
         Fp = PyTango.DeviceProxy('i11-ma-c00/ex/fp_parser')
         if x == None:
             return Fp.TrueTrans_FP
@@ -90,6 +90,7 @@ class XfeCollect(object):
         
         
     def go10eVabovetheEdge(self):
+        if self.test: return 0
         self.ble.write_attribute('energy', self.thEdge + 0.01)
         self.wait(self.ble)
         #self.monodevice.write_attribute('energy', self.thEdge + 0.01)
@@ -104,6 +105,7 @@ class XfeCollect(object):
         return (e_edge, roi_center)    
         
     def optimizeTransmission(self, element, edge):
+        if self.test: return 0
         self.optimize = True
         e_edge, roi_center = self.getEdgefromXabs(element, edge)
         self.thEdge = e_edge
@@ -139,6 +141,7 @@ class XfeCollect(object):
         self.extractDetector()
         
     def adjustTransmission(self):
+        if self.test: return 0
         self.currentTransmission = self.transmission()
         print 'current transmission is %f' % self.currentTransmission
         print 'the deadtime is %f' % self.inverseDeadTime
@@ -157,35 +160,31 @@ class XfeCollect(object):
         return True
         
     def setIntegrationTime(self, integrationTime = 1.):
+        if self.test: return 0
         #self.counter.integrationTime = integrationTime
         self.fluodet.presetvalue = int(integrationTime)
         
     def setROI(self, roi_debut = 0., roi_fin = 2048.):
+        if self.test: return 0
         self.fluodet.SetROIs(numpy.array((roi_debut, roi_fin)))
         #pass
     
     def insertDetector(self):
-#        self.md2.write_attribute('FluoDetectorBack', 0)
-#        time.sleep(5)
-        self.ketek_ins.Insert()
-        time.sleep(1.0)            
-        while str(self.ketek_ins.State()) == 'MOVING':
-                time.sleep(0.2)            
-
+        if self.test: return 0
+        self.md2.MoveFluoDetectorFront()
+        self.wait(self.md2)
     
     def extractDetector(self):
-#        self.md2.write_attribute('FluoDetectorBack', 1)
-#        time.sleep(5)
-        self.ketek_ins.Extract()
-        time.sleep(0.2)            
-        while str(self.ketek_ins.State()) == 'MOVING':
-                time.sleep(0.2)            
+        if self.test: return 0
+        self.md2.MoveFluoDetectorBack()
+        self.wait(self.md2)
     
     def startXfeSpectrum(self):
         self.measureSpectrum()
         return 
         
     def cancelXfeSpectrum(self):
+        if self.test: return 0
         self.md2.CloseFastShutter()
         self.fluodet.Abort()
         self.obx.Close()
@@ -195,6 +194,7 @@ class XfeCollect(object):
         return True
         
     def measureSpectrum(self):
+        if self.test: return 0
         self.setIntegrationTime(self.integrationTime)
         if self.optimize != True:
             self.insertDetector()
@@ -229,7 +229,7 @@ class XfeCollect(object):
         return numpy.arange(start, end, step)
 
     def getValue(self):
-	return self.getXvals(), self.getSpectrum()
+        return self.getXvals(), self.getSpectrum()
 
     def saveData(self):
         f = open(self.filename[:-4]  + '.pck', 'w')
