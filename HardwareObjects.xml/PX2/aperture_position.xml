@@ -1,5 +1,5 @@
 <device class="TangoDCMotorWPositions">
-    <username>Aperture Position</username>
+    <username></username>
     <tangoname>i11-ma-cx1/ex/md2</tangoname>
     <channel type="tango" polling="1000" name="state">State</channel>
     <datatype>int</datatype>
