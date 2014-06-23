@@ -264,6 +264,7 @@ class MiniDiffPX2(Equipment):
 
 
     def getCalibrationData(self, offset):
+        return 
         if self.zoomMotor is not None:
             if self.zoomMotor.hasObject('positions'):
                 for position in self.zoomMotor['positions']:
@@ -274,7 +275,7 @@ class MiniDiffPX2(Equipment):
 
 
     def zoomMotorPredefinedPositionChanged(self, positionName, offset):
-        self.pixelsPerMmY, self.pixelsPerMmZ = self.getCalibrationData(offset)
+        self.pixelsPerMmY, self.pixelsPerMmZ = self.get_pixels_per_mm() # self.getCalibrationData(offset)
         self.emit('zoomMotorPredefinedPositionChanged', (positionName, offset, ))
 
 
@@ -428,7 +429,7 @@ class MiniDiffPX2(Equipment):
 
   
     def motor_positions_to_screen(self, centred_positions_dict):
-        self.pixelsPerMmY, self.pixelsPerMmZ = self.getCalibrationData(self.zoomMotor.getPosition())
+        self.pixelsPerMmY, self.pixelsPerMmZ = self.get_pixels_per_mm() #getCalibrationData(self.zoomMotor.getPosition())
         phi_angle = math.radians(self.centringPhi.direction*self.phiMotor.getPosition()) 
         sampx = self.centringSamplex.direction * (centred_positions_dict["sampx"]-self.sampleXMotor.getPosition())
         sampy = self.centringSampley.direction * (centred_positions_dict["sampy"]-self.sampleYMotor.getPosition())
@@ -487,7 +488,7 @@ class MiniDiffPX2(Equipment):
           while self.zoomMotor.motorIsMoving():
               time.sleep(0.1)
 
-          self.pixelsPerMmY, self.pixelsPerMmZ = self.getCalibrationData(self.zoomMotor.getPosition())
+          self.pixelsPerMmY, self.pixelsPerMmZ = self.get_pixels_per_mm() # .self.getCalibrationData(self.zoomMotor.getPosition())
 
           if self.user_confirms_centring:
             self.emitCentringSuccessful()
