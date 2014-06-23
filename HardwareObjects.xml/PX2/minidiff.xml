@@ -38,7 +38,7 @@
         <sampy>0.0</sampy>
     </resetPosition>
     <device role="camera" hwrid="/gc655c"></device>
-    <device role="samplechanger" hwrid="/cats"></device>   
+    <device role="sample_changer" hwrid="/cats"></device>   
     <motors>
         <phi-shutter>
             <device role="phi" hwrid="/phi"></device>
