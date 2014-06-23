@@ -10,11 +10,12 @@ import numpy
 import commands
 import pickle
 import math
+import os
 
 class xanes(object):
     cutoff = 4
     
-    def __init__(self,
+    def __init__(self, parent,
                  element,
                  edge,
                  directory='/tmp/testXanes',
@@ -45,7 +46,7 @@ class xanes(object):
                  expert=False):
 
         # initialize logging
-
+        self.parent = parent
         self.element = element
         self.edge = edge
         self.prefix = prefix
@@ -477,6 +478,7 @@ class xanes(object):
         # readout
         if self.test:
             self.results['observations'][en] = {'point': self.testData[en]}
+            self.parent.newPoint(float(en), float(self.results['observations'][en]['point']))
             return
         # measurement
         self.results['observations'][en] = {'roiCounts': self.fluodet.roi00_01,
@@ -526,7 +528,9 @@ class xanes(object):
 
     def saveRaw(self):
         logging.info('saveRaw')
-        f = open('{prefix}_{element}_{edge}.raw'.format(**self.results), 'w')
+        #logging.info('self.results %s' % self.results)
+        logging.info('raw filename %s' % os.path.join(self.directory, '{prefix}_{element}_{edge}.raw'.format(**self.results)))
+        f = open(os.path.join(self.directory, '{prefix}_{element}_{edge}.raw'.format(**self.results)), 'w')
         f.write('Proxima 2A, Escan, {date}\n'.format(**{'date': time.ctime(self.results['timestamp'])}))
         f.write('{nbPoints}\n'.format(**{'nbPoints': len(self.results['points'])}))
         self.raw = []
@@ -563,9 +567,9 @@ class xanes(object):
         logging.info('chooch')
         chooch_parameters = {'element': self.element, 
                              'edge': self.edge,
-                             'raw_file': '{prefix}_{element}_{edge}.raw'.format(**self.results),
-                             'output_ps': '{prefix}_{element}_{edge}.ps'.format(**self.results),
-                             'output_efs': '{prefix}_{element}_{edge}.efs'.format(**self.results)}
+                             'raw_file': os.path.join(self.directory, '{prefix}_{element}_{edge}.raw'.format(**self.results)),
+                             'output_ps': os.path.join(self.directory, '{prefix}_{element}_{edge}.ps'.format(**self.results)),
+                             'output_efs':os.path.join(self.directory, '{prefix}_{element}_{edge}.efs'.format(**self.results))}
                      
         chooch_output = commands.getoutput('chooch -p {output_ps} -o {output_efs} -e {element} -a {edge} {raw_file}'.format(**chooch_parameters))
         self.results['chooch_output'] = chooch_output
@@ -574,7 +578,7 @@ class xanes(object):
         self.results['chooch_results'] = chooch_results
         
     def getEfs(self):
-        filename = '{prefix}_{element}_{edge}.efs'.format(**self.results)
+        filename = os.path.join(self.directory, '{prefix}_{element}_{edge}.efs'.format(**self.results))
         f = open(filename)
         data = f.read().split('\n')
         efs = numpy.array([numpy.array(map(float, line.split())) for line in data if len(line.split()) == 3])
@@ -595,7 +599,7 @@ class xanes(object):
     def plotNewPoint(self):
         self.ax.plot(self.runningScan['ens'], self.runningScan['points'], 'bo-')
         plt.draw()
-
+        
     def getRunningScan(self):
         ens = []
         points = []
