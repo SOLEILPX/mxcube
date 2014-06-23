@@ -50,10 +50,15 @@ def prepare(centring_motors_dict):
 
   phi = centring_motors_dict["phi"]
   phiy = centring_motors_dict["phiy"]
+  phiz = centring_motors_dict["phiz"]
   sampx = centring_motors_dict["sampx"]
   sampy = centring_motors_dict["sampy"]
-
-  return phi, phiy, sampx, sampy
+  logging.info('directions phi %s, phiy %s, phiz %s, sampx %s, sampz %s' % (centring_motors_dict["phi"].direction, 
+                                                                            centring_motors_dict["phiy"].direction,
+                                                                            centring_motors_dict["phiz"].direction,
+                                                                            centring_motors_dict["sampx"].direction,
+                                                                            centring_motors_dict["sampy"].direction))
+  return phi, phiy, phiz, sampx, sampy
   
 def start(centring_motors_dict,
           pixelsPerMm_Hor, pixelsPerMm_Ver, 
@@ -62,11 +67,12 @@ def start(centring_motors_dict,
           n_points = 3):
   global CURRENT_CENTRING
 
-  phi, phiy, sampx, sampy = prepare(centring_motors_dict)
+  phi, phiy, phiz, sampx, sampy = prepare(centring_motors_dict)
 
   CURRENT_CENTRING = gevent.spawn(center, 
                                   phi,
                                   phiy,
+                                  phiz,
                                   sampx, 
                                   sampy, 
                                   pixelsPerMm_Hor, pixelsPerMm_Ver, 
@@ -95,12 +101,13 @@ def move_motors(motor_positions_dict):
   wait_ready()
   
 def user_click(x,y, wait=False):
+  logging.info("sample_centring: user_click %s, %s" % (x, y))
   READY_FOR_NEXT_POINT.clear()
   USER_CLICKED_EVENT.set((x,y))
   if wait:
     READY_FOR_NEXT_POINT.wait()
   
-def center(phi, phiy,
+def center(phi, phiy, phiz,
            sampx, sampy, 
            pixelsPerMm_Hor, pixelsPerMm_Ver, 
            beam_xc, beam_yc,
@@ -151,6 +158,7 @@ def center(phi, phiy,
   centred_pos = SAVED_INITIAL_POSITIONS.copy()
   centred_pos.update({ sampx.motor: float(sampx.getPosition() + sampx.direction*(dx + vertical_move[0,0])),
                        sampy.motor: float(sampy.getPosition() + sampy.direction*(dy + vertical_move[1,0])),
+                       phiz.motor: float(phiz.getPosition() + phiz.direction*d_vertical[0,0]),
                        phiy.motor: float(phiy.getPosition() + phiy.direction*d_horizontal[0,0]) })
   return centred_pos
 
