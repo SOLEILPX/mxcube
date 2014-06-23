@@ -101,10 +101,10 @@ class SoleilBeamStopBrick(DuoStateBrick):
     
     def __init__(self, *args):
         DuoStateBrick.__init__.im_func(self, *args)
-        self.alignmentDialog = BeamStopAlignmentDialog("Beamstop alignment", self.beamstopAligned, self.alignDismissClicked)
+        #self.alignmentDialog = BeamStopAlignmentDialog("Beamstop alignment", self.beamstopAligned, self.alignDismissClicked)
         self.beamstop = None
         self.positions = {}
-        self.connect(self.stateLabel,PYSIGNAL('setupClicked'),self.setupClicked)
+        #self.connect(self.stateLabel,PYSIGNAL('setupClicked'),self.setupClicked)
         self.connect(self.stateLabel,PYSIGNAL('stopClicked'),self.stopClicked)
         self.addProperty('setupIcon', 'string', '')
         self.addProperty('stopIcon', 'string', '')
@@ -112,7 +112,6 @@ class SoleilBeamStopBrick(DuoStateBrick):
     def alignDismissClicked(self):
         pass
 
-    #def allowSetup(self,state):
     def setExpertMode(self,state):
         self.stateLabel.showButton(state)
 
@@ -131,29 +130,18 @@ class SoleilBeamStopBrick(DuoStateBrick):
                 self.connect(self.beamstop, PYSIGNAL('equipmentNotReady'), self.equipmentNotReady)
                 self.connect(self.beamstop, PYSIGNAL("positionReached"), self.positionChanged)
                 self.connect(self.beamstop, PYSIGNAL("noPosition"), self.positionChanged)
+                self.connect(self.beamstop, PYSIGNAL("stateChanged"), self.stateChanged)
 
                 help=self['setin']+" the "+self.beamstop.userName().lower()
                 QToolTip.add(self.setInButton,help)
                 help=self['setout']+" the "+self.beamstop.userName().lower()
                 QToolTip.add(self.setOutButton,help)
                  
-                #if not "in" in self.beamstop.positions or not "out" in self.beamstop.positions:
-                #    logging.getLogger().warning("%s: vertical beamstop motor does not define In and Out positions", str(self.name()))
-                
                 self.containerBox.setTitle(self.beamstop.userName())
-                self.alignmentDialog.setMnemonic(newValue)
-
-                # do some checkings...
-                try:
-                    bstopz = self.beamstop.getDeviceByRole("vertical").getMotorMnemonic()
-                    bstopy = self.beamstop.getDeviceByRole("horizontal").getMotorMnemonic()
-                except:
-                    logging.getLogger().error("%s: could not find vertical and horizontal motors in Hardware Object %s", str(self.name()), self.beamstop.name())
+                #self.alignmentDialog.setMnemonic(newValue)
 
                 if self.beamstop.isReady():
-                    #self.beamstop.setNewPositions("out", {"vertical": self.beamstop.getDeviceByRole("vertical").getLimits()[0] })
                     self.equipmentReady()
-                    #self.beamstop.checkPosition()
                 else:
                     self.equipmentNotReady()
             else:
@@ -176,16 +164,12 @@ class SoleilBeamStopBrick(DuoStateBrick):
             BaseComponents.BlissWidget.propertyChanged(self,propertyName,oldValue,newValue)
 
     def setIn(self,state):
-        #print "BeamstopBrick.setIn",state
         if state:
-            #print "GO IN"
             self.beamstop.moveToPosition("in")
         else:
             DuoStateBrick.setIn.im_func(self,False)
 
     def setOut(self,state):
-        #print "BeamstopBrick.setOut",state
-        self.beamstop.setNewPositions("out", {"vertical": self.beamstop.getDeviceByRole("vertical").getLimits()[0] })
         if state:
             self.beamstop.moveToPosition("out")
         else:
@@ -198,8 +182,8 @@ class SoleilBeamStopBrick(DuoStateBrick):
         #self.stateChanged('disabled')
         self.setEnabled(False)
 
-    def setupClicked(self):
-        self.alignmentDialog.show() #exec_loop()
+    #def setupClicked(self):
+        #self.alignmentDialog.show() #exec_loop()
 
     def beamstopAligned(self):
         try:
@@ -238,6 +222,7 @@ class SoleilBeamStopBrick(DuoStateBrick):
                 self.stateChanged("unknown")
 
     def stateChanged(self,state):
+        logging.getLogger().info(" TangoBeamStopBrick got new state:  %s" % str(state))
         self.stateLabel.setButtonStopEnabled(state=="moving")
         # weird Python bug : why do we need im_func sometimes?
         DuoStateBrick.stateChanged.im_func(self,state)

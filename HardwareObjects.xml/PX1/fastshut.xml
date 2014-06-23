@@ -2,6 +2,6 @@
   <username>FastShutter</username>
   <tangoname>i10-c-cx1/ex/spishutter-pos</tangoname>
   <channel type="tango" polling="1000" name="State">State</channel>
-  <command type="tango" name="open">Open</command>
-  <command type="tango" name="close">Close</command>
+  <command type="tango" name="Open">Open</command>
+  <command type="tango" name="Close">Close</command>
 </device>

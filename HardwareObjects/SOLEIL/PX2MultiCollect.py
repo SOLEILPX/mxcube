@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from SOLEILMultiCollect import *
 import shutil
 import logging
@@ -601,5 +600,4 @@ class PX2MultiCollect(SOLEILMultiCollect):
                 frame += 1
 
             self.finalize_acquisition()
-                
 
