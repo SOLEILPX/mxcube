@@ -2,6 +2,7 @@
 
    <collectname>i10-c-cx1/ex/collect</collectname>
    <pilatusname>i10-c-cx1/dt/pilatus</pilatusname>
+   <fluomotor>i10-c-cx1/dt/dtc_sdd.1-pos</fluomotor>
    <oscaxis>Phi</oscaxis>
 
    <!-- object href="/dbconnection-mockup" role="dbserver" / -->
@@ -21,5 +22,6 @@
    <!-- object href="/flux" role="flux" / -->
 
    <directory_prefix>PX1</directory_prefix>
+   <close_safty_shutter>0</close_safty_shutter>
 
 </object>
