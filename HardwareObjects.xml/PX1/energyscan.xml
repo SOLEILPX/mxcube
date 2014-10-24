@@ -16,9 +16,9 @@
     <directoryprefix>/session</directoryprefix>
     <scan>
         <roiwidth>0.35</roiwidth>
-        <before>0.05</before>
-        <after>0.05</after>
-        <nbsteps>100</nbsteps>
+        <before>0.04</before>
+        <after>0.04</after>
+        <nbsteps>80</nbsteps>
         <integrationtime>1</integrationtime>
     </scan>
     

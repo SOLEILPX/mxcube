@@ -5,13 +5,37 @@
 
     <wagolight>/lightarm</wagolight>
     <bstop>/beamstop</bstop>
-    <samplechanger>/sc-mockup</samplechanger>
+    <samplechanger>/cats</samplechanger>
 
-   <!-- <tangoname>i11-ma-cx1/ex/md2</tangoname>-->
+    <command type="tango" tangoname="i10-c-cx1/ex/microglide" name="uGlideMoveCmd">AbsoluteMoveInXYZ</command>
+
     <phiy_direction>-1</phiy_direction>
     
-    <!-- command type="tango" name="start_scan">StartScan</command -->
-    <!-- channel type="tango" name="scan_start_angle">ScanStartAngle</command-->
+    <device role="camera" hwrid="/ge1350c"></device>
+    <device role="obx" hwrid="/obx"></device>
+    <device role="microglide" hwrid="/microglide"></device>
+    <device role="guillotine" hwrid="/guillotine"></device>
+    <tangoname>i10-c-cx1/ex/cats</tangoname>
+
+    <motors>
+        <phi-shutter>
+            <device role="phi" hwrid="/phi"></device>
+            <device role="phiz" hwrid="/uglidez"></device>
+            <device role="omega" hwrid="/omega"></device>
+            <device role="kappa" hwrid="/kappa"></device>
+        </phi-shutter>
+        <detector>
+            <device role="detdist" hwrid="/detectordistance"></device>
+        </detector>
+        <sample>
+            <device role="zoom" hwrid="/zoom"></device>
+            <device role="light" hwrid="/light"></device>
+            <device role="kappa" hwrid="/kappa"></device>  
+            <device role="kappa_phi" hwrid="/omega"></device>  
+            <device role="sampx" hwrid="/uglidex"></device>
+            <device role="sampy" hwrid="/uglidey"></device>
+        </sample>
+    </motors>
 
     <referencePosition>
         <phi delta="0.1">0.0</phi>
@@ -23,6 +47,7 @@
         <sampx delta="0.01">0.0</sampx>
         <sampy delta="0.01">0.0</sampy>
     </referencePosition>
+
     <referencePositionWithKappa>
         <phi delta="0.1">0.0</phi>
         <phiz delta="0.01">0.0</phiz>
@@ -35,6 +60,7 @@
         <kap1 delta="0.01">0.0</kap1>
         <kap2 delta="0.01">0.0</kap2>
     </referencePositionWithKappa>
+
     <resetPosition>
         <phiz>0.0</phiz>
         <focus>0.0</focus>
@@ -42,25 +68,5 @@
         <sampx>0.0</sampx>
         <sampy>0.0</sampy>
     </resetPosition>
-    <device role="camera" hwrid="/ge1350c"></device>
-    <motors>
-        <phi-shutter>
-            <device role="phi" hwrid="/phi"></device>
-            <device role="phiz" hwrid="/uglidez"></device>
-            <device role="omega" hwrid="/omega"></device>
-            <device role="kappa" hwrid="/kappa"></device>
-        </phi-shutter>
-        <sample>
-            <device role="zoom" hwrid="/zoom"></device>
-            <device role="light" hwrid="/light"></device>
-            <device role="focus" hwrid="/phiz"></device>
-            <device role="phiy" hwrid="/phiz"></device>  
-            <device role="kappa" hwrid="/kappa"></device>  
-            <device role="kappa_phi" hwrid="/omega"></device>  
-            <device role="sampx" hwrid="/uglidex"></device>
-            <device role="sampy" hwrid="/uglidey"></device>
-            <!-- device role="beamcenterx" hwrid="/beamcenterX"></device -->
-            <!-- device role="beamcenterz" hwrid="/beamcenterZ"></device -->
-        </sample>
-    </motors>
+
 </equipment>

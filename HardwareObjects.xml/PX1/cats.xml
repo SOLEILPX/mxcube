@@ -31,5 +31,8 @@
   <channel type="tango" name="_chnSampleBarcode" polling="events">Barcode</channel>
   <channel type="tango" name="_chnPathRunning" polling="events">PathRunning</channel>
   <channel type="tango" name="_chnSampleIsDetected" polling="events">di_PRI1_GFM</channel>
+
+  <channel type="tango" polling="500" name="softwareAuthorization">gonioMovementAuthorized</channel>
+
 </equipment>
 
