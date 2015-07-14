@@ -1409,6 +1409,15 @@ def dc_from_edna_output(edna_result, reference_image_collection,
 
     return data_collections
 
+# Should create_subwedges and create_inverse_beam_sw reside in queue_model_objects ?
+# It might be better to relegate any queue setup to collect module e.g AbstractMultiCollect
+# derived classes. What about then about the approach to setting up complex interleaved 
+# experiments (suggested by Gleb)
+#   -- specify canonical sweeps 
+#   -- then specify interleaving operator on any pair of them
+#   -- resulting interleaved sweep then becomes a sweep itself
+#      on which additional interleaving operation can be executed
+# Could we have inverse beam data collection as single entry in the queue ?
 def create_subwedges(total_num_images, sw_size, osc_range, osc_start):
     """
     Creates n subwedges where n = total_num_images / subwedge_size.
