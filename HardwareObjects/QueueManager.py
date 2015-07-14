@@ -15,6 +15,7 @@ from HardwareRepository.BaseHardwareObjects import HardwareObject
 from queue_entry import QueueEntryContainer
 
 
+#The log file path should be configurable MS 2015-07-14
 logger = logging.getLogger('queue_exec')
 try:
     formatter = \
